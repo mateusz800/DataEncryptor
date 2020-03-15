@@ -2,8 +2,9 @@ import tkinter as tk
 from file_chooser import FileChooser
 from key import Key
 from file import File
+from network import send, receive
 import sys
-
+import threading
 
 class Application:
     """
@@ -19,6 +20,8 @@ class Application:
         self._create_widgets()
 
         self._window.grid_columnconfigure(1, weight=1)
+        receiver = threading.Thread(target=receive, args=('127.0.0.1',))
+        receiver.start()
 
     def run(self):
         self._window.mainloop()
@@ -35,11 +38,12 @@ class Application:
 
     def _generate_key(self):
         self._key.generate()
-        self._key.save_txt('key.txt')
+        self._key.save_txt('output/key.txt')
         self._init_vector.generate()
-        self._init_vector.save_txt('init_vector.txt')
+        self._init_vector.save_txt('output/init_vector.txt')
 
     def _encrypt(self):
         file = File(path=self._file_chooser.get_file_path())
         file.encrypt(key=self._key.key, iv=self._init_vector.key)
         file.decrypt(key=self._key.key, iv=self._init_vector.key)
+        send('127.0.0.1','hello world')
