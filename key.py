@@ -14,7 +14,7 @@ class Key:
         rndfile = Random.new()
         self.key = rndfile.read(self._length)
 
-    def save_txt(self, path: str = 'key.txt'):
+    def save_txt(self, path: str = 'output/key.txt'):
         """
         save generated key to file
         """

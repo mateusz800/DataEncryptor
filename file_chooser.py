@@ -27,14 +27,14 @@ class FileChooser:
         # put widgets on the window
         self._label.grid(row=0, column=0)
         self._file_entry.grid(row=0, column=1, sticky=tk.EW)
-        self._file_btn.grid(row=0, column=2, sticky='e')
+        self._file_btn.grid(row=0, column=2, sticky='e', padx=10)
 
     def _select_file(self):
         """
         Open file dialog and update label with path
         """
         self._file_path = askopenfilename(
-            initialdir='/', title='select file', filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+            initialdir='/', title='select file')
         self._file_entry.configure(state=tk.NORMAL)
         self._file_entry.delete(0, tk.END)
         self._file_entry.insert(0, f'...{self._file_path[-50:]}')
