@@ -1,2 +1,2 @@
-lpycrypto
+pycrypto
 sphinx
