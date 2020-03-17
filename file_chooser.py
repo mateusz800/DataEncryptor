@@ -41,9 +41,10 @@ class FileChooser:
         self._file_entry.configure(state=tk.DISABLED)
         self._file_entry.xview(tk.END)
 
-    def get_file_path(self):
+    def get_file_path(self) -> str:
         """
-        If the file is valid return path to the file
+        :return: choosen file path
+        :rtype: str
         """
         if not os.path.isfile(self._file_path):
             raise Exception('file does not exist')

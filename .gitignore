@@ -6,4 +6,7 @@ __pycache__
 .vscode
 output/*
 docs/build
+docs/source/*
+!docs/source/conf.py
+!docs/source/index.rst
 

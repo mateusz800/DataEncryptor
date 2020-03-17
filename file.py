@@ -4,15 +4,33 @@ from Crypto.Cipher import AES
 
 
 class File:
+    """
+    File class hold the information about file. 
+    It also provides methods to encrypt or decrypth it content
+    """
+
     def __init__(self, path: str):
+        """
+        :param str path: path to the file
+        """
         super().__init__()
         self._path = path
         self._extension = self.get_extension()
 
-    def get_extension(self):
+    def get_extension(self) -> str:
+        """
+
+        :return: extension of the file
+        :rtype: str
+        """
         return self._path.split('.')[-1]
 
-    def get_data(self):
+    def get_data(self) -> str:
+        """
+
+        :return str: file content
+        :rtype: str
+        """
         with open(self._path, 'r') as file:
             return file.read()
 
@@ -21,9 +39,10 @@ class File:
         Encrypt the file and save it to a temporary file
         Key and initialization vector parameters are required.
         If key or initailization vector is not passed the exception will raise
-        : param str key: key to data ecryption and decryption
-        : param str iv: initialization vector
-        : param str cipher: cipher mode - default AES
+
+        :param str key: key to data ecryption and decryption
+        :param str iv: initialization vector
+        :param str cipher: cipher mode, defaults to AES
         """
         if key == None:
             raise Exception('Not valid key')
@@ -52,9 +71,10 @@ class File:
         Decrypt the file and save it to a file
         Key and initialization vector parameters are required
         If key or initailization vector is not passed the exception will raise
-        :param key: key to data ecryption and decryption
-        :param iv: initialization vector
-        :param cipher: cipher mode - default AES
+
+        :param str key: key to data ecryption and decryption
+        :param str iv: initialization vector
+        :param str cipher: cipher mode - default AES
         """
         if key == None:
             raise Exception('Not valid key')

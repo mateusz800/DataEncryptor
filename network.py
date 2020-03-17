@@ -2,10 +2,11 @@ import socket
 
 def send(host: str, data, port: int = 8080):
     """
-    Implementation of client
-    It send data to the other computer
-    :param host: ip address of the receiver
-    :param port: port
+    Implementation of client.
+    It send data to the other computer.
+
+    :param str host: ip address of the receiver
+    :param int port: port, defaults to 8080
     """
     with socket.socket() as s:
         s.connect((host, port))
@@ -13,12 +14,12 @@ def send(host: str, data, port: int = 8080):
 
 def receive(host: str = '0.0.0.0', port: int = 8080):
     """
-    Implementation of server
+    Implementation of server.
     It in infinite loop waits for connection and when the connection will
-    be established receive the data and write it to the file
-    :param host: ip address of the sender (default 0.0.0.0 what's mean all 
-        IPv4 addresses on the local machine)
-    :param port: port
+    be established receive the data and write it to the file.
+
+    :param str host: ip address of the sender ,default to 0.0.0.0 what's mean all IPv4 addresses on the local machine)
+    :param int port: port, defaults to 8080
     """
     with socket.socket() as s:
         s.bind((host, port))
