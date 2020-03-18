@@ -1,12 +1,10 @@
 import tkinter as tk
-from tkinter.ttk import Progressbar
-from file_chooser import FileChooser
+import sys
+
 from key import Key
 from file import File
-from network import send, ReceiveThread
-from progress import Progress
-import sys
-import threading
+from components import FileChooser, Progress
+from network import ReceiveThread, send
 
 
 class Application:
@@ -60,7 +58,6 @@ class Application:
     def _encrypt(self):
         file = File(path=self._file_chooser.get_file_path())
         file.encrypt(key=self._key.key, iv=self._init_vector.key)
-        file.decrypt(key=self._key.key, iv=self._init_vector.key)
         send('0.0.0.0', file.get_data.encode('utf-8'))
 
     def _exit(self):
