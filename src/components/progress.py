@@ -11,4 +11,4 @@ class Progress:
         """
         super().__init__()
         self._bar = Progressbar(length=width)
-        self._bar.grid(columnspan=3)
+        self._bar.pack()

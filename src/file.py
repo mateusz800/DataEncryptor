@@ -16,18 +16,24 @@ class File:
         super().__init__()
         self._path = path
         self._extension = self.get_extension()
+        self._name = self.get_name()
 
     def get_extension(self) -> str:
         """
-
         :return: extension of the file
         :rtype: str
         """
         return self._path.split('.')[-1]
 
+    def get_name(self) -> str:
+        """
+        :return : name of the file without extension
+        :rtype: str
+        """
+        return self._path.split(".")[-1]
+
     def get_data(self) -> str:
         """
-
         :return str: file content
         :rtype: str
         """
@@ -36,7 +42,7 @@ class File:
 
     def encrypt(self, key: str, iv: str, cipher: str = 'AES'):
         """
-        Encrypt the file and save it to a temporary file
+        Encrypt the file and save it to a file: name_encrypted.extension
         Key and initialization vector parameters are required.
         If key or initailization vector is not passed the exception will raise
 
@@ -50,7 +56,7 @@ class File:
             raise Exception('Not valid initialization key')
         aes = AES.new(key, AES.MODE_CBC, iv)
         file_size = os.path.getsize(self._path)
-        with open(f'output/encrypted_file.{self._extension}', 'wb') as fout:
+        with open(f'temp/{self._name}_encrypted.{self._extension}', 'wb') as fout:
             fout.write(struct.pack('<Q', file_size))
             fout.write(iv)
             with open(self._path, 'r') as fin:
@@ -80,11 +86,11 @@ class File:
             raise Exception('Not valid key')
         if iv == None:
             raise Exception('Not valid initialization key')
-        with open(f'output/encrypted_file.{self._extension}', 'rb') as fin:
+        with open(f'temp/encrypted_file.{self._extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
             aes = AES.new(key, AES.MODE_CBC, iv)
-            with open(f'output/decrypted_file.{self._extension}', 'w') as fout:
+            with open(f'temp/decrypted_file.{self._extension}', 'w') as fout:
                 while True:
                     data = fin.read(-1)
                     n = len(data)

@@ -11,8 +11,8 @@ def send(host: str, data, port: int = 8080):
     :param int port: port, defaults to 8080
     """
     with socket.socket() as s:
-        self._socket.connect((host, port))
-        self._socket.send(data)
+        s.connect((host, port))
+        s.send(data)
 
 
 

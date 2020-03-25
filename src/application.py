@@ -2,8 +2,8 @@ import tkinter as tk
 import sys
 
 from key import Key
-from file import File
-from components import FileChooser, Progress
+
+from components import LocalFile, ReceivedFiles, Progress
 from network import ReceiveThread, send
 
 
@@ -12,7 +12,7 @@ class Application:
     Class responsible for running the entire programm
     """
 
-    def __init__(self, width: int = 500, height: int = 200):
+    def __init__(self, width: int = 1000, height: int = 500):
         """
         :param width: width of the window (default 500)
         :param height: height of the window (default 200)
@@ -35,30 +35,25 @@ class Application:
         """
         Creating widgets and putting them into screen
         """
-        self._file_chooser = FileChooser()
-
         self._generate_key_btn = tk.Button(
-            text='generate key', command=self._generate_key)
-        self._generate_key_btn.grid()
-        self._send_btn = tk.Button(
-            text='send encrypted file', command=self._encrypt)
-        self._send_btn.grid()
-
-        self._progress = Progress()
+            self._window, text='generate key', command=self._generate_key)
+        self._generate_key_btn.pack()
+        self._local_file = LocalFile(self._window)
+        self._local_file.pack()
+        self._received_files = ReceivedFiles(self._window)
+        self._received_files.pack(side=tk.LEFT)
+        # self._progress = Progress()
+        # self._progress.pack()
 
     def _generate_key(self):
         """
         generate keys and save them to the text file
         """
         self._key.generate()
-        self._key.save_txt('output/key.txt')
+        self._key.save_txt('temp/key.txt')
         self._init_vector.generate()
-        self._init_vector.save_txt('output/init_vector.txt')
-
-    def _encrypt(self):
-        file = File(path=self._file_chooser.get_file_path())
-        file.encrypt(key=self._key.key, iv=self._init_vector.key)
-        send('0.0.0.0', file.get_data.encode('utf-8'))
+        self._init_vector.save_txt('temp/init_vector.txt')
+        self._local_file.add_keys(self._key.key, self._init_vector.key)
 
     def _exit(self):
         """
