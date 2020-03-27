@@ -3,7 +3,7 @@ import sys
 
 from key import Key
 
-from components import LocalFile, ReceivedFiles, Progress
+from components import LocalFile, ReceivedFile, Progress
 from network import ReceiveThread, send
 
 
@@ -37,11 +37,11 @@ class Application:
         """
         self._generate_key_btn = tk.Button(
             self._window, text='generate key', command=self._generate_key)
-        self._generate_key_btn.pack()
+        self._generate_key_btn.pack(pady=20)
+        self._received_file = ReceivedFile(self._window)
+        self._received_file.pack(pady=40)
         self._local_file = LocalFile(self._window)
-        self._local_file.pack()
-        self._received_files = ReceivedFiles(self._window)
-        self._received_files.pack(side=tk.LEFT)
+        self._local_file.pack(pady=40)
         # self._progress = Progress()
         # self._progress.pack()
 

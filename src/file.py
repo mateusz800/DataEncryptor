@@ -8,37 +8,50 @@ class File:
     File class hold the information about file. 
     It also provides methods to encrypt or decrypth it content
     """
+    _size_prefix = ('B', 'KB', 'MB', 'GB')
 
     def __init__(self, path: str):
         """
         :param str path: path to the file
         """
         super().__init__()
-        self._path = path
-        self._extension = self.get_extension()
-        self._name = self.get_name()
+        self.path = path
+        self.encrypted = False
 
-    def get_extension(self) -> str:
+    def __getattr__(self, attr):
         """
-        :return: extension of the file
-        :rtype: str
+        Available attributes:
+            extension - file extension
+            name - file name without extension
+            data - file content (str)
+            size - file size in appropriate unit
+            encrypted_data - encrypted file content
         """
-        return self._path.split('.')[-1]
+        if attr == 'extension':
+            return self.path.split('.')[-1]
+        elif attr == 'name':
+            return self.path.split("/")[-1]
+        elif attr == 'data':
+            with open(self.path, 'r') as file:
+                return file.read()
+        elif attr == 'encrypted_data':
+            with open(f'{self.name}_encrypted{self.extension}', 'rb') as file:
+                return file.read()
+        elif attr == 'size':
+            return self.__calculate_size()
+        else:
+            raise AttributeError
 
-    def get_name(self) -> str:
-        """
-        :return : name of the file without extension
-        :rtype: str
-        """
-        return self._path.split(".")[-1]
+    def __dir__(self):
+        return ('path', 'name', 'extension', 'data')
 
-    def get_data(self) -> str:
-        """
-        :return str: file content
-        :rtype: str
-        """
-        with open(self._path, 'r') as file:
-            return file.read()
+    def __calculate_size(self):
+        size = os.path.getsize(self.path)
+        size_prefix_index = 0
+        while(size / 1000 >= 1):
+            size /= 1000
+            size_prefix_index += 1
+        return f"{round(size, 2)} {self._size_prefix[size_prefix_index]}"
 
     def encrypt(self, key: str, iv: str, cipher: str = 'AES'):
         """
@@ -55,11 +68,11 @@ class File:
         if iv == None:
             raise Exception('Not valid initialization key')
         aes = AES.new(key, AES.MODE_CBC, iv)
-        file_size = os.path.getsize(self._path)
-        with open(f'temp/{self._name}_encrypted.{self._extension}', 'wb') as fout:
+        file_size = os.path.getsize(self.path)
+        with open(f'temp/{self.name}_encrypted.{self.extension}', 'wb') as fout:
             fout.write(struct.pack('<Q', file_size))
             fout.write(iv)
-            with open(self._path, 'r') as fin:
+            with open(self.path, 'rb') as fin:
                 chunk_size = 2048  # must be divided by 16
                 while True:
                     data = fin.read(chunk_size)
@@ -68,9 +81,10 @@ class File:
                         break
                     elif n % 16 != 0:
                         # file size must be divided by 16
-                        data += ' ' * (16 - n % 16)
+                        data += ' '.encode() * (16 - n % 16)
                     encd = aes.encrypt(data)
                     fout.write(encd)
+            self.encrypted = True
 
     def decrypt(self, key: str = None, iv: str = None, cipher: str = 'AES'):
         """

@@ -1,21 +1,20 @@
 import os.path
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+
 from file import File
+from .file_widget import FileWidget
 
 
-class ReceivedFiles(tk.Frame):
+class ReceivedFile(FileWidget):
     """
+    Shows received file information, and makes some operations on that file available
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._pack_widgets()
 
-    def _pack_widgets(self):
-        """
-        Put widgets on the window
-        """
+    def _pack_buttons(self):
         pass
 
 
