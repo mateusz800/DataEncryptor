@@ -53,7 +53,7 @@ class File:
             size_prefix_index += 1
         return f"{round(size, 2)} {self._size_prefix[size_prefix_index]}"
 
-    def encrypt(self, key: str, iv: str, cipher: str = 'AES'):
+    def encrypt(self, key: str, iv: str, cipher: str = 'AES', progress_func=None):
         """
         Encrypt the file and save it to a file: name_encrypted.extension
         Key and initialization vector parameters are required.
@@ -63,13 +63,10 @@ class File:
         :param str iv: initialization vector
         :param str cipher: cipher mode, defaults to AES
         """
-        if key == None:
-            raise Exception('Not valid key')
-        if iv == None:
-            raise Exception('Not valid initialization key')
+        # for now only AES cipher
         aes = AES.new(key, AES.MODE_CBC, iv)
         file_size = os.path.getsize(self.path)
-        with open(f'temp/{self.name}_encrypted.{self.extension}', 'wb') as fout:
+        with open(f'temp/encrypted_file.{self.extension}', 'wb') as fout:
             fout.write(struct.pack('<Q', file_size))
             fout.write(iv)
             with open(self.path, 'rb') as fin:
@@ -84,9 +81,11 @@ class File:
                         data += ' '.encode() * (16 - n % 16)
                     encd = aes.encrypt(data)
                     fout.write(encd)
+                    if progress_func:
+                        progress_func(int(len(data)/file_size) * 100 )
             self.encrypted = True
 
-    def decrypt(self, key: str = None, iv: str = None, cipher: str = 'AES'):
+    def decrypt(self, key: str, iv: str, cipher: str = 'AES'):
         """
         Decrypt the file and save it to a file
         Key and initialization vector parameters are required
@@ -96,15 +95,11 @@ class File:
         :param str iv: initialization vector
         :param str cipher: cipher mode - default AES
         """
-        if key == None:
-            raise Exception('Not valid key')
-        if iv == None:
-            raise Exception('Not valid initialization key')
-        with open(f'temp/encrypted_file.{self._extension}', 'rb') as fin:
+        with open(f'temp/encrypted_file.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
             aes = AES.new(key, AES.MODE_CBC, iv)
-            with open(f'temp/decrypted_file.{self._extension}', 'w') as fout:
+            with open(f'temp/decrypted_file.{self.extension}', 'w') as fout:
                 while True:
                     data = fin.read(-1)
                     n = len(data)

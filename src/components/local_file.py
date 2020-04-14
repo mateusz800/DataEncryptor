@@ -17,8 +17,9 @@ class LocalFile(FileWidget):
     _iv_key = None
     _key = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, progress_bar, *args, **kwargs):
         super(LocalFile, self).__init__(*args, **kwargs)
+        self._progress_bar = progress_bar
 
     def _pack_buttons(self):
         """
@@ -54,7 +55,8 @@ class LocalFile(FileWidget):
 
     def _encrypt(self):
         try:
-            self._current_file.encrypt(key=self._key, iv=self._iv)
+            self._current_file.encrypt(key=self._key, iv=self._iv, progress_func=self._set_progress)
+            self._current_file.decrypt(key=self._key, iv=self._iv)
             self._send_btn.config(state=tk.NORMAL)
         except AttributeError:
             # show message that user didn't generate keys
@@ -82,3 +84,9 @@ class LocalFile(FileWidget):
         """
         self._key = key
         self._iv = iv
+
+    def _set_progress(self, value):
+        """
+        Inform progress bar about progress about some task
+        """
+        self._progress_bar.set_progress(value)

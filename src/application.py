@@ -22,9 +22,10 @@ class Application:
         self._init_vector = Key(length=16)
         self._window.geometry('{}x{}'.format(width, height))
         self._create_widgets()
-
-        self._window.protocol("WM_DELETE_WINDOW", self._exit)
+        # call _exit fucntion when exit
+        self._window.protocol("WM_DELETE_WINDOW", self._exit) 
         self._window.grid_columnconfigure(1, weight=1)
+        # start thread responsible to listen and receive file
         self._receive_thread = ReceiveThread(host='0.0.0.0')
         self._receive_thread.start()
 
@@ -40,10 +41,11 @@ class Application:
         self._generate_key_btn.pack(pady=20)
         self._received_file = ReceivedFile(self._window)
         self._received_file.pack(pady=40)
-        self._local_file = LocalFile(self._window)
+        self._progress = Progress(self._window)
+        self._local_file = LocalFile(master=self._window, progress_bar=self._progress)
         self._local_file.pack(pady=40)
-        # self._progress = Progress()
-        # self._progress.pack()
+        self._progress.pack(fill=tk.X)
+        self._progress.pack_bar()
 
     def _generate_key(self):
         """
