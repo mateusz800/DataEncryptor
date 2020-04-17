@@ -1,3 +1,4 @@
+import os
 import socket
 import threading
 import math
@@ -44,15 +45,16 @@ class SendThread(threading.Thread):
 
     def run(self):
         chunk_size = 1024
-        steps = math.ceil(float(self._file.size.split(' ')[0])/chunk_size)
+        file_size = os.path.getsize(self._file.path)
+        steps = math.ceil(file_size/chunk_size)
         sended = 0
         with socket.socket() as s:
             s.connect((self._host, self._port))
             file_name = f'{self._file.name}.{self._file.extension}'
             s.send(file_name.encode())
             for i in range(steps):     
-                s.send(file.encrypted_data[sended:sended+chunk_size])
+                s.send(self._file.encrypted_data[sended:sended+chunk_size])
                 sended += chunk_size
                 if self._show_progress_func:
-                    self._show_progress_func(int((sended/self._file.size)*100))
+                    self._show_progress_func(int((sended/file_size)*100))
 

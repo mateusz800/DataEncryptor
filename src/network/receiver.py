@@ -38,10 +38,13 @@ class ReceiveThread(threading.Thread):
             if not os.path.isdir('received_files'):
                 os.makedirs('received_files')
             with conn:
-                if not self._key:
-                    self._key = conn.recv(16)
-                    iv = conn.recv(16)
-                    self._show_modal_func(self._key, iv)
+                if self._key == None:
+                    try:
+                        self._key = conn.recv(16)
+                        iv = conn.recv(16)
+                        self._show_modal_func(self._key, iv)
+                    except TypeError as err:
+                        print(err)
                 else:
                     path = f'received_files/{conn.recv(1024).decode()}'
                     with open(path, 'wb') as file:
