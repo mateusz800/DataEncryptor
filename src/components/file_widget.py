@@ -1,6 +1,9 @@
+import os
 import tkinter as tk
 from tkinter import ttk
-import os
+
+from file import File
+
 
 
 class FileWidget(tk.Frame):
@@ -27,6 +30,9 @@ class FileWidget(tk.Frame):
     
     def _pack_buttons(self):
         raise NotImplementedError
+
+    def _unlock_buttons(self):
+        raise NotImplementedError
     
     def _get_file_info(self, path: str):
         """
@@ -34,4 +40,22 @@ class FileWidget(tk.Frame):
             (file_name, file_type, is_encrypted, file_size)
         """
         return (self._current_file.name, self._current_file.extension, self._current_file.encrypted, self._current_file.size)
+
+    def _show_file_info(self, path: str):
+        """
+        Show information about the file
+
+        :param str path: path to the file
+        """
+        self._info.insert('', 0, values=self._get_file_info(path))
+    
+    def set_file(self, path: str, encrypted:bool = False):
+        """
+        Set the file object that the widget shouls show
+
+        :param str path: path to the file
+        """
+        self._current_file = File(path, encrypted)
+        self._show_file_info(path)
+        self._unlock_buttons()
 

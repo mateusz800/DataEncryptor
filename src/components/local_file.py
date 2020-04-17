@@ -28,12 +28,14 @@ class LocalFile(FileWidget):
         self._file_btn = tk.Button(
             self, text='select file', command=self._select_file)
         self._file_btn.pack(side=tk.LEFT)
-        self._open_btn = tk.Button(self, text='open file', state=tk.DISABLED, command=self._open_file)
+        self._open_btn = tk.Button(
+            self, text='open file', state=tk.DISABLED, command=self._open_file)
         self._open_btn.pack(side=tk.LEFT, padx=self._vertical_btn_margin)
         self._encrypt_btn = tk.Button(
             self, text='encrypt', command=self._encrypt, state=tk.DISABLED)
         self._encrypt_btn.pack(side=tk.LEFT)
-        self._send_btn = tk.Button(self, text='send', command=self._send, state=tk.DISABLED)
+        self._send_btn = tk.Button(
+            self, text='send', command=self._send, state=tk.DISABLED)
         self._send_btn.pack(side=tk.LEFT)
 
     def _select_file(self):
@@ -42,9 +44,7 @@ class LocalFile(FileWidget):
         """
         path = askopenfilename(
             initialdir='/', title='select file')
-        self._current_file = File(path)
-        self._info.insert('', 0, values=self._get_file_info(path))
-        self._unlock_buttons()
+        self.set_file(path)
 
     def _unlock_buttons(self):
         """
@@ -52,12 +52,25 @@ class LocalFile(FileWidget):
         """
         self._open_btn.config(state=tk.NORMAL)
         self._encrypt_btn.config(state=tk.NORMAL)
+        self._file_btn.config(state=tk.NORMAL)
+        self._send_btn.config(state=tk.NORMAL)
+
+    def _lock_buttons(self):
+        """
+        Lock buttons when system is busy (file encryption or sending) to prevent taking new actions
+        """
+        self._file_btn.config(state=tk.DISABLED)
+        self._open_btn.config(state=tk.DISABLED)
+        self._encrypt_btn.config(state=tk.DISABLED)
+        self._send_btn.config(state=tk.DISABLED)
 
     def _encrypt(self):
         try:
-            self._current_file.encrypt(key=self._key, iv=self._iv, progress_func=self._set_progress)
-            self._current_file.decrypt(key=self._key, iv=self._iv)
-            self._send_btn.config(state=tk.NORMAL)
+            self._lock_buttons()
+            self._current_file.encrypt(
+                key=self._key, iv=self._iv, progress_func=self._set_progress, unlock_btns_func=self._unlock_buttons)
+            # self._current_file.decrypt(key=self._key, iv=self._iv)
+            # buttons should be unlocked when encription will be finished
         except AttributeError:
             # show message that user didn't generate keys
             print('keys are not generated')
@@ -66,19 +79,19 @@ class LocalFile(FileWidget):
         """
         Send the encryped file
         """
-        send('0.0.0.0', self._current_file.encrypted_data)
-    
-    def _open_file(self, encrypted=False):
+        send('0.0.0.0', self._current_file)
+
+    def _open_file(self):
         """
         Open file in default application
         """
-        print(self._current_file.path)
+        path = self._current_file.path
         try:
-            os.startfile(self._current_file.path, 'open')
+            os.startfile(path, 'open')
         except AttributeError:
-            subprocess.call(['open', self._current_file.path])
+            subprocess.call(['open', path])
 
-    def add_keys(self, key:str, iv:str):
+    def add_keys(self, key: str, iv: str):
         """
         Add keys needed to encrypt the file
         """

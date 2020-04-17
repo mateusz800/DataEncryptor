@@ -1,6 +1,9 @@
 import struct
 import os
+
 from Crypto.Cipher import AES
+
+from encryptor import Encryptor
 
 
 class File:
@@ -10,13 +13,13 @@ class File:
     """
     _size_prefix = ('B', 'KB', 'MB', 'GB')
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, encrypted=False):
         """
         :param str path: path to the file
         """
         super().__init__()
         self.path = path
-        self.encrypted = False
+        self.encrypted = encrypted
 
     def __getattr__(self, attr):
         """
@@ -30,12 +33,12 @@ class File:
         if attr == 'extension':
             return self.path.split('.')[-1]
         elif attr == 'name':
-            return self.path.split("/")[-1]
+            return self.path.split("/")[-1].split('.')[0]
         elif attr == 'data':
             with open(self.path, 'r') as file:
                 return file.read()
         elif attr == 'encrypted_data':
-            with open(f'{self.name}_encrypted{self.extension}', 'rb') as file:
+            with open(f'temp/{self.name}_encrypted.{self.extension}', 'rb') as file:
                 return file.read()
         elif attr == 'size':
             return self.__calculate_size()
@@ -53,7 +56,7 @@ class File:
             size_prefix_index += 1
         return f"{round(size, 2)} {self._size_prefix[size_prefix_index]}"
 
-    def encrypt(self, key: str, iv: str, cipher: str = 'AES', progress_func=None):
+    def encrypt(self, key: str, iv: str, cipher: str = 'AES', progress_func=None, unlock_btns_func=None):
         """
         Encrypt the file and save it to a file: name_encrypted.extension
         Key and initialization vector parameters are required.
@@ -64,28 +67,12 @@ class File:
         :param str cipher: cipher mode, defaults to AES
         """
         # for now only AES cipher
-        aes = AES.new(key, AES.MODE_CBC, iv)
-        file_size = os.path.getsize(self.path)
-        with open(f'temp/encrypted_file.{self.extension}', 'wb') as fout:
-            fout.write(struct.pack('<Q', file_size))
-            fout.write(iv)
-            with open(self.path, 'rb') as fin:
-                chunk_size = 2048  # must be divided by 16
-                while True:
-                    data = fin.read(chunk_size)
-                    n = len(data)
-                    if n == 0:
-                        break
-                    elif n % 16 != 0:
-                        # file size must be divided by 16
-                        data += ' '.encode() * (16 - n % 16)
-                    encd = aes.encrypt(data)
-                    fout.write(encd)
-                    if progress_func:
-                        progress_func(int(len(data)/file_size) * 100 )
-            self.encrypted = True
+        encryption_thread = Encryptor(
+            self, key, iv, cipher, progress_func, unlock_btns_func)
+        self.encrypted = encryption_thread.start()
+        return self.encrypted
 
-    def decrypt(self, key: str, iv: str, cipher: str = 'AES'):
+    def decrypt(self, key: str, iv: str, cipher: str = 'CBC'):
         """
         Decrypt the file and save it to a file
         Key and initialization vector parameters are required
@@ -93,13 +80,13 @@ class File:
 
         :param str key: key to data ecryption and decryption
         :param str iv: initialization vector
-        :param str cipher: cipher mode - default AES
+        :param str cipher: cipher mode - default CBC
         """
-        with open(f'temp/encrypted_file.{self.extension}', 'rb') as fin:
+        with open(f'temp/{self.name}_encrypted.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
             aes = AES.new(key, AES.MODE_CBC, iv)
-            with open(f'temp/decrypted_file.{self.extension}', 'w') as fout:
+            with open(f'temp/{self.name}_decrypted.{self.extension}', 'w') as fout:
                 while True:
                     data = fin.read(-1)
                     n = len(data)
