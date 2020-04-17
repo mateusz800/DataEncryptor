@@ -41,7 +41,7 @@ class ReceiveThread(threading.Thread):
                 if not self._key:
                     self._key = conn.recv(16)
                     iv = conn.recv(16)
-                    self._show_modal_func(key, iv)
+                    self._show_modal_func(self._key, iv)
                 else:
                     path = f'received_files/{conn.recv(1024).decode()}'
                     with open(path, 'wb') as file:

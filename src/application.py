@@ -4,7 +4,7 @@ import sys
 from key import Key
 from components import LocalFile, ReceivedFile, Progress
 from components.password_modal_window import PasswordModalWindow
-from network import ReceiveThread, send, send_key
+from network import ReceiveThread, send_key
 
 
 class Application:
@@ -28,7 +28,7 @@ class Application:
         self._window.grid_columnconfigure(1, weight=1)
         # start thread responsible to listen and receive file
         self._receive_thread = ReceiveThread(
-            host='0.0.0.0', widget=self._received_file, show_modal_func=self.show_password_modal)
+            host='', widget=self._received_file, show_modal_func=self.show_password_modal)
         self._receive_thread.start()
 
     def run(self):
@@ -70,7 +70,7 @@ class Application:
         self._key = key
     
     def _send_key(self):
-        send_key(host='0.0.0.0', key=self._key, iv=self._init_vector.key)
+        send_key(host='192.168.1.130', key=self._key, iv=self._init_vector.key)
 
     def _exit(self):
         """

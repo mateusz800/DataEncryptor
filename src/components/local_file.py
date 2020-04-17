@@ -5,7 +5,7 @@ from tkinter.filedialog import askopenfilename
 
 from .file_widget import FileWidget
 from file import File
-from network import send
+from network import SendThread
 
 
 class LocalFile(FileWidget):
@@ -79,7 +79,10 @@ class LocalFile(FileWidget):
         """
         Send the encryped file
         """
-        send('0.0.0.0', self._current_file)
+        send_thread = SendThread(file=self._current_file, host='192.168.1.130',
+                                 show_progress_func=self._progress_bar.set_progress)
+        send_thread.start()
+        # send('192.168.1.130', self._current_file)
 
     def _open_file(self):
         """

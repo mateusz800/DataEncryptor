@@ -1,2 +1,2 @@
 from .receiver import ReceiveThread
-from .sender import send, send_key
+from .sender import SendThread, send_key

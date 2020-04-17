@@ -5,6 +5,7 @@ __pycache__
 !linux_requirements.txt
 .vscode
 temp/*
+received_files/*
 docs/build
 docs/source/*
 !docs/source/conf.py
