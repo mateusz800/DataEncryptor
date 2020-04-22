@@ -18,7 +18,7 @@ class LocalFile(FileWidget):
     _key = None
 
     def __init__(self, progress_bar, *args, **kwargs):
-        super(LocalFile, self).__init__(*args, **kwargs)
+        super(LocalFile, self).__init__(name='Choosen file', *args, **kwargs)
         self._progress_bar = progress_bar
 
     def _pack_buttons(self):

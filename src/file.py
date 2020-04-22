@@ -82,11 +82,12 @@ class File:
         :param str iv: initialization vector
         :param str cipher: cipher mode - default CBC
         """
-        with open(f'temp/{self.name}_encrypted.{self.extension}', 'rb') as fin:
+
+        with open(f'received_files/{self.name}.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
             aes = AES.new(key, AES.MODE_CBC, iv)
-            with open(f'temp/{self.name}_decrypted.{self.extension}', 'w') as fout:
+            with open(f'temp/{self.name}_decrypted.{self.extension}', 'wb') as fout:
                 while True:
                     data = fin.read(-1)
                     n = len(data)
@@ -97,8 +98,5 @@ class File:
                         data += b' ' * (16 - n % 16)
                     decd = aes.decrypt(data)
                     n = len(decd)
-                    if file_size > n:
-                        fout.write(decd[:file_size].decode())
-                    else:
-                        fout.write(decd[:file_size].decode())
+                    fout.write(decd[:file_size])
                     file_size -= n

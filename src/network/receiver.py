@@ -44,7 +44,7 @@ class ReceiveThread(threading.Thread):
                         iv = conn.recv(16)
                         self._show_modal_func(self._key, iv)
                     except TypeError as err:
-                        print(err)
+                        pass
                 else:
                     path = f'received_files/{conn.recv(1024).decode()}'
                     with open(path, 'wb') as file:
@@ -53,7 +53,6 @@ class ReceiveThread(threading.Thread):
                             if not data:
                                 break
                             file.write(data)
-                    self._show_modal_func()
                     self._file_widget.set_file(path, encrypted=True)
 
     def stop(self):

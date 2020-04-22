@@ -26,5 +26,5 @@ class PasswordModalWindow(tk.Toplevel):
         password = self._input.get()
         key = Key(length=16)
         key.decrypt_with_password(self._key_data, password=password, iv=self._iv)
-        self._set_key_func(key)
+        self._set_key_func(key, self._iv)
         self.destroy()
