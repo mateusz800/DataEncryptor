@@ -26,7 +26,7 @@ class Application:
         self._settings_frame = tk.Frame(self._window)
         self._mode_chooser = ModeChooser(master=self._settings_frame)
         self._receiver_address = tk.Entry(self._settings_frame)
-        self._files_widget = FilesRow(progress_bar=self._progress, receiver_address=self._receiver_address,
+        self._files_widget = FilesRow(progress_bar=self._progress, receiver_address=self.get_receiver_address,
                                       mode_chooser=self._mode_chooser, master=self._window)
         self._create_widgets()
         # call _exit fucntion when exits
@@ -98,7 +98,7 @@ class Application:
         self._files_widget.received_file.set_keys(key.key, iv)
 
     def _send_key(self):
-        send_key(host=self._receiver_address['value'],
+        send_key(host=self._receiver_address.get(),
                  key=self._key, iv=self._init_vector.key)
 
     def _exit(self):
@@ -118,3 +118,6 @@ class Application:
         self._password_modal = PasswordModalWindow(
             set_key_func=self.set_key, iv=iv, key_data=key_data)
         self._password_modal.focus()
+
+    def get_receiver_address(self):
+        return self._receiver_address.get()

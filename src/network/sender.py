@@ -32,15 +32,16 @@ def send(host: str, file: File, port: int = 8080):
         s.send(file.encrypted_data)
 
 class SendThread(threading.Thread):
-    def __init__(self, file, host: str = '0.0.0.0', port: int = 8080, show_progress_func=None):
+    def __init__(self, file, mode:str, host:str, port: int = 8080, show_progress_func=None):
         """
-        :param str host: ip address of the sender ,default to 0.0.0.0 what's mean all IPv4 addresses on the local machine)
+        :param str host: ip address of the sender
         :param int port: port, defaults to 8080
         """
         super().__init__()
         self._host: str = host
         self._port: int = port
         self._file = file
+        self._mode = mode
         self._show_progress_func = show_progress_func
 
     def run(self):
@@ -52,6 +53,7 @@ class SendThread(threading.Thread):
             s.connect((self._host, self._port))
             file_name = f'{self._file.name}.{self._file.extension}'
             s.send(file_name.encode())
+            s.send(self._mode.encode())
             for i in range(steps):     
                 s.send(self._file.encrypted_data[sended:sended+chunk_size])
                 sended += chunk_size

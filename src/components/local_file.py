@@ -81,7 +81,7 @@ class LocalFile(FileWidget):
         """
         Send the encryped file
         """
-        send_thread = SendThread(file=self._current_file, host=self._receiver_address["value"],
+        send_thread = SendThread(file=self._current_file, host=self._receiver_address(), mode=self._mode_chooser.get_active(),
                                  show_progress_func=self._progress_bar.set_progress)
         send_thread.start()
         # send('192.168.1.130', self._current_file)
