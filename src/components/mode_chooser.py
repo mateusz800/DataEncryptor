@@ -27,4 +27,4 @@ class ModeChooser(tk.Frame):
         """
         returns active mode CBC or ECB or CFB or EFB
         """
-        return self.MODES[self._active_mode-1][0]
+        return self.MODES[int(self._active_mode.get())-1][0]

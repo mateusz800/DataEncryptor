@@ -70,7 +70,7 @@ class LocalFile(FileWidget):
         try:
             self._lock_buttons()
             self._current_file.encrypt(
-                key=self._key, iv=self._iv, cipher=self._mode_chooser.get_active(), progress_func=self._set_progress, unlock_btns_func=self._unlock_buttons)
+                key=self._key, iv=self._iv, mode=self._mode_chooser.get_active(), progress_func=self._set_progress, unlock_btns_func=self._unlock_buttons)
             # self._current_file.decrypt(key=self._key, iv=self._iv)
             # buttons should be unlocked when encription will be finished
         except AttributeError:
