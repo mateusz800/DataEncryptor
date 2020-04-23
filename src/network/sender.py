@@ -52,6 +52,7 @@ class SendThread(threading.Thread):
         with socket.socket() as s:
             s.connect((self._host, self._port))
             file_name = f'{self._file.name}.{self._file.extension}'
+            print(file_name)
             s.send(file_name.encode())
             s.send(self._mode.encode())
             for i in range(steps):     

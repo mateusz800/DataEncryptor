@@ -80,13 +80,13 @@ class File:
 
         :param str key: key to data ecryption and decryption
         :param str iv: initialization vector
-        :param str cipher: cipher mode - default CBC
+        :param str mode: cipher mode - default CBC
         """
 
         with open(f'received_files/{self.name}.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
-            aes = AES.new(key, self._get_aes_mode(cipher), iv)
+            aes = AES.new(key, self._get_aes_mode(mode), iv)
             with open(f'temp/{self.name}_decrypted.{self.extension}', 'wb') as fout:
                 while True:
                     data = fin.read(-1)

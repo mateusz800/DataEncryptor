@@ -46,8 +46,8 @@ class ReceiveThread(threading.Thread):
                     except TypeError as err:
                         pass
                 else:
-                    mode = conn.recv(3).decode()
                     path = f'received_files/{conn.recv(1024).decode()}'
+                    mode = conn.recv(3).decode()
                     with open(path, 'wb') as file:
                         while True:
                             data = conn.recv(1024)
