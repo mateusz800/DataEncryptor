@@ -11,12 +11,12 @@ class Encryptor(threading.Thread):
     """ 
     Thread responsible for file encryption 
     """
-    def __init__(self, file, key: str, iv: str, cipher: str = 'AES', progress_func=None, unlock_file_btns=None):
+    def __init__(self, file, key: str, iv: str, mode, progress_func=None, unlock_file_btns=None):
         super(Encryptor, self).__init__()
         self._file = file
         self._key = key
         self._iv = iv
-        self._cipher = cipher
+        self._mode = mode
         self._progress_func = progress_func
         self._unlock_btns_func = unlock_file_btns
 

@@ -22,3 +22,9 @@ class ModeChooser(tk.Frame):
             rb = Radiobutton(
                 self, text=text, variable=self._active_mode, value=mode)
             rb.pack(side=tk.LEFT)
+
+    def get_active(self):
+        """
+        returns active mode CBC or ECB or CFB or EFB
+        """
+        return self.MODES[self._active_mode-1][0]

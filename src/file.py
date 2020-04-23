@@ -56,7 +56,7 @@ class File:
             size_prefix_index += 1
         return f"{round(size, 2)} {self._size_prefix[size_prefix_index]}"
 
-    def encrypt(self, key: str, iv: str, cipher: str = 'AES', progress_func=None, unlock_btns_func=None):
+    def encrypt(self, key: str, iv: str, mode: str = 'CBC', progress_func=None, unlock_btns_func=None):
         """
         Encrypt the file and save it to a file: name_encrypted.extension
         Key and initialization vector parameters are required.
@@ -68,11 +68,11 @@ class File:
         """
         # for now only AES cipher
         encryption_thread = Encryptor(
-            self, key, iv, cipher, progress_func, unlock_btns_func)
+            self, key, iv, mode, progress_func, unlock_btns_func)
         self.encrypted = encryption_thread.start()
         return self.encrypted
 
-    def decrypt(self, key: str, iv: str, cipher: str = 'CBC'):
+    def decrypt(self, key: str, iv: str, mode: str = 'CBC'):
         """
         Decrypt the file and save it to a file
         Key and initialization vector parameters are required
@@ -86,7 +86,7 @@ class File:
         with open(f'received_files/{self.name}.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
-            aes = AES.new(key, AES.MODE_CBC, iv)
+            aes = AES.new(key, self._get_aes_mode(cipher), iv)
             with open(f'temp/{self.name}_decrypted.{self.extension}', 'wb') as fout:
                 while True:
                     data = fin.read(-1)
@@ -100,3 +100,14 @@ class File:
                     n = len(decd)
                     fout.write(decd[:file_size])
                     file_size -= n
+
+    def _get_aes_mode(self, mode: str):
+        """
+        return mode compatible with Crypto.Cipher.AES
+        """
+        return {
+            'CBC': AES.MODE_CBC,
+            'ECB': AES.MODE_ECB,
+            'CFB': AES.MODE_CFB,
+            'OFB': AES.MODE_OFB
+        }[mode]

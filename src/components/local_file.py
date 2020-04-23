@@ -17,9 +17,11 @@ class LocalFile(FileWidget):
     _iv_key = None
     _key = None
 
-    def __init__(self, progress_bar, *args, **kwargs):
+    def __init__(self, progress_bar, receiver_address,  mode_chooser, *args, **kwargs):
         super(LocalFile, self).__init__(name='Choosen file', *args, **kwargs)
         self._progress_bar = progress_bar
+        self._mode_chooser = mode_chooser
+        self._receiver_address = receiver_address
 
     def _pack_buttons(self):
         """
@@ -68,7 +70,7 @@ class LocalFile(FileWidget):
         try:
             self._lock_buttons()
             self._current_file.encrypt(
-                key=self._key, iv=self._iv, progress_func=self._set_progress, unlock_btns_func=self._unlock_buttons)
+                key=self._key, iv=self._iv, cipher=self._mode_chooser.get_active(), progress_func=self._set_progress, unlock_btns_func=self._unlock_buttons)
             # self._current_file.decrypt(key=self._key, iv=self._iv)
             # buttons should be unlocked when encription will be finished
         except AttributeError:
@@ -79,7 +81,7 @@ class LocalFile(FileWidget):
         """
         Send the encryped file
         """
-        send_thread = SendThread(file=self._current_file, host='192.168.1.130',
+        send_thread = SendThread(file=self._current_file, host=self._receiver_address["value"],
                                  show_progress_func=self._progress_bar.set_progress)
         send_thread.start()
         # send('192.168.1.130', self._current_file)
