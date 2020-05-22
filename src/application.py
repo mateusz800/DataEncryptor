@@ -55,8 +55,12 @@ class Application:
         self._send_key_btn.pack(fill=tk.X)
         key_frame.pack(side=tk.LEFT)
         # second column of the row 1 - receiver address
-        self._receiver_address = tk.Entry(self._settings_frame)
-        self._receiver_address.pack(side=tk.LEFT, padx=20)
+        receiver_address_col = tk.Frame(self._settings_frame)
+        label = tk.Label(receiver_address_col, text='Receiver IP address:')
+        label.pack(side=tk.TOP)
+        self._receiver_address = tk.Entry(receiver_address_col)
+        self._receiver_address.pack(side=tk.BOTTOM)
+        receiver_address_col.pack(side=tk.LEFT, padx=20)
         # third column of the row 1 - cipher mode
         self._mode_chooser.pack(side=tk.LEFT, padx=20)
         self._settings_frame.pack(fill=tk.X, padx=10)
@@ -98,8 +102,12 @@ class Application:
         self._files_widget.received_file.set_keys(key.key, iv)
 
     def _send_key(self):
-        send_key(host=self._receiver_address.get(),
-                 key=self._key, iv=self._init_vector.key)
+        host = self._receiver_address.get()
+        if host != '':
+            send_key(host=self._receiver_address.get(),
+                    key=self._key, iv=self._init_vector.key)
+        else:
+            print('You have to specify a receiver IP address')
 
     def _exit(self):
         """

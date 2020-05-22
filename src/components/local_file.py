@@ -55,7 +55,6 @@ class LocalFile(FileWidget):
         self._open_btn.config(state=tk.NORMAL)
         self._encrypt_btn.config(state=tk.NORMAL)
         self._file_btn.config(state=tk.NORMAL)
-        self._send_btn.config(state=tk.NORMAL)
 
     def _lock_buttons(self):
         """
@@ -71,20 +70,26 @@ class LocalFile(FileWidget):
             self._lock_buttons()
             self._current_file.encrypt(
                 key=self._key, iv=self._iv, mode=self._mode_chooser.get_active(), progress_func=self._set_progress, unlock_btns_func=self._unlock_buttons)
-            # self._current_file.decrypt(key=self._key, iv=self._iv)
+            self._send_btn.config(state=tk.NORMAL)
             # buttons should be unlocked when encription will be finished
         except AttributeError:
             # show message that user didn't generate keys
             print('keys are not generated')
+        
 
     def _send(self):
         """
         Send the encryped file
         """
-        send_thread = SendThread(file=self._current_file, host=self._receiver_address(), mode=self._mode_chooser.get_active(),
+        host = self._receiver_address()
+        if host != '' and self._current_file.encrypted:
+            send_thread = SendThread(file=self._current_file, host=host, mode=self._mode_chooser.get_active(),
                                  show_progress_func=self._progress_bar.set_progress)
-        send_thread.start()
-        # send('192.168.1.130', self._current_file)
+            send_thread.start()
+        elif not self._current_file.encrypted:
+            print('You have to encrypt the file first')
+        else:
+            print('You have to specify a receiver IP address')
 
     def _open_file(self):
         """

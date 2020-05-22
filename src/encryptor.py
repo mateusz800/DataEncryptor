@@ -4,6 +4,8 @@ import os
 
 from Crypto.Cipher import AES
 
+from components.mode_chooser import ModeChooser
+
 
 
 
@@ -11,7 +13,7 @@ class Encryptor(threading.Thread):
     """ 
     Thread responsible for file encryption 
     """
-    def __init__(self, file, key: str, iv: str, mode, progress_func=None, unlock_file_btns=None):
+    def __init__(self, file, key: str, iv: str, mode:str, progress_func=None, unlock_file_btns=None):
         super(Encryptor, self).__init__()
         self._file = file
         self._key = key
@@ -22,7 +24,7 @@ class Encryptor(threading.Thread):
 
     def run(self):
            # for now only AES cipher
-        aes = AES.new(self._key, AES.MODE_CBC, self._iv)
+        aes = self._get_aes()
         file_size = os.path.getsize(self._file.path)
         with open(f'temp/{self._file.name}_encrypted.{self._file.extension}', 'wb') as fout:
             fout.write(struct.pack('<Q', file_size))
@@ -45,3 +47,17 @@ class Encryptor(threading.Thread):
                         self._progress_func(int((read_size/file_size) * 100) )
         self._unlock_btns_func()
         return True
+
+    def _get_aes(self):
+        """
+        Get AES object based on the mode
+        """
+        for text, _ in ModeChooser.MODES:
+            if self._mode == text:
+                return {
+                    'CBC': AES.new(self._key, AES.MODE_CBC, self._iv),
+                    'ECB': AES.new(self._key, AES.MODE_ECB, self._iv),
+                    'CFB': AES.new(self._key, AES.MODE_CFB, self._iv),
+                    'OFB': AES.new(self._key, AES.MODE_OFB, self._iv),
+                }[text] 
+                
