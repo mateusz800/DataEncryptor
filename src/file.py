@@ -3,7 +3,7 @@ import os
 
 from Crypto.Cipher import AES
 
-from encryptor import Encryptor
+from encryptor import FileEncryptor
 
 
 class File:
@@ -13,13 +13,14 @@ class File:
     """
     _size_prefix = ('B', 'KB', 'MB', 'GB')
 
-    def __init__(self, path: str, encrypted=False):
+    def __init__(self, path: str, encrypted=False, encrypted_mode=None):
         """
         :param str path: path to the file
         """
         super().__init__()
         self.path = path
         self.encrypted = encrypted
+        self._encrypted_mode = encrypted_mode
 
     def __getattr__(self, attr):
         """
@@ -56,7 +57,7 @@ class File:
             size_prefix_index += 1
         return f"{round(size, 2)} {self._size_prefix[size_prefix_index]}"
 
-    def encrypt(self, key: str, iv: str, mode: str = 'CBC', progress_func=None, unlock_btns_func=None):
+    def encrypt(self, key: str, iv: str, mode: str=None, progress_func=None, unlock_btns_func=None):
         """
         Encrypt the file and save it to a file: name_encrypted.extension
         Key and initialization vector parameters are required.
@@ -66,10 +67,12 @@ class File:
         :param str iv: initialization vector
         :param str cipher: cipher mode, defaults to AES
         """
-        # for now only AES cipher
-        encryption_thread = Encryptor(
+        if mode == None:
+            mode = self._encrypted_mode
+        encryption_thread = FileEncryptor(
             self, key, iv, mode, progress_func, unlock_btns_func)
-        self.encrypted = encryption_thread.start()
+        encryption_thread.start()
+        self.encrypted = True
         return self.encrypted
 
     def decrypt(self, key: str, iv: str, mode: str = 'CBC'):
@@ -87,7 +90,8 @@ class File:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
             aes = AES.new(key, self._get_aes_mode(mode), iv)
-            with open(f'temp/{self.name}_decrypted.{self.extension}', 'wb') as fout:
+            self.path = f'temp/{self.name}_decrypted.{self.extension}'
+            with open(self.path, 'wb') as fout:
                 while True:
                     data = fin.read(-1)
                     n = len(data)

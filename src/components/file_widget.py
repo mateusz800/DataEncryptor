@@ -18,7 +18,6 @@ class FileWidget(tk.Frame):
         self._current_file = None
         self._name = name
         self.__pack_widgets()
-    
 
     def __pack_widgets(self):
         """
@@ -55,7 +54,7 @@ class FileWidget(tk.Frame):
         """
         self._info.insert('', 0, values=self._get_file_info(path))
 
-    def set_file(self, path: str, encrypted: bool = False):
+    def set_file(self, path: str, encrypted: bool = False, mode: str = 'CBC'):
         """
         Set the file object that the widget shouls show
 

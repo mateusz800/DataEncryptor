@@ -3,10 +3,11 @@ import threading
 import os
 
 from components.received_file import ReceivedFile
+from components.message_receiver import MessageReceiver
 
 
 class ReceiveThread(threading.Thread):
-    def __init__(self, widget: ReceivedFile, show_modal_func,  host: str = '0.0.0.0', port: int = 8080):
+    def __init__(self, widget: ReceivedFile, message_receiver: MessageReceiver,  show_modal_func, host: str = '0.0.0.0', port: int = 8080):
         """
         :param  ReceivedFile widget: widget object that shows information about received file
         :param str host: ip address of the sender ,default to 0.0.0.0 what's mean all IPv4 addresses on the local machine)
@@ -17,6 +18,7 @@ class ReceiveThread(threading.Thread):
         self._port: int = port
         self._socket = socket.socket()
         self._file_widget = widget
+        self._message_receiver = message_receiver
         self._show_modal_func = show_modal_func
         self._key = None
 
@@ -46,15 +48,29 @@ class ReceiveThread(threading.Thread):
                     except TypeError as err:
                         pass
                 else:
-                    path = f'received_files/{conn.recv(1024).decode()}'
-                    mode = conn.recv(3).decode()
-                    with open(path, 'wb') as file:
-                        while True:
-                            data = conn.recv(1024)
-                            if not data:
-                                break
-                            file.write(data)
-                    self._file_widget.set_file(path, encrypted=True)
+                    file_name = conn.recv(1024).decode()
+                    if file_name != 'message_encrypted.txt':
+                        # file receiving
+                        path = f'received_files/{file_name}'
+                        mode = conn.recv(3).decode()
+                        with open(path, 'wb') as file:
+                            while True:
+                                data = conn.recv(1024)
+                                if not data:
+                                    break
+                                file.write(data)
+                        self._file_widget.set_file(path, encrypted=True)
+                    else:
+                        # message receiving
+                        mode = conn.recv(3).decode()
+                        with open('message_received.txt', 'wb') as file:
+                            while True:
+                                data = conn.recv(1024)
+                                if not data:
+                                    break
+                                file.write(data)
+                        self._message_receiver.set_message('message_received.txt', mode)
+
 
     def stop(self):
         """

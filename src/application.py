@@ -1,8 +1,8 @@
-import tkinter as tk
 import sys
+import tkinter as tk
 
 from key import Key
-from components import FilesRow, Progress, ModeChooser
+from components import FilesRow, Progress, ModeChooser, MessageSender, MessageReceiver
 from components.password_modal_window import PasswordModalWindow
 from network import ReceiveThread, send_key
 
@@ -28,13 +28,16 @@ class Application:
         self._receiver_address = tk.Entry(self._settings_frame)
         self._files_widget = FilesRow(progress_bar=self._progress, receiver_address=self.get_receiver_address,
                                       mode_chooser=self._mode_chooser, master=self._window)
+        self._second_row_frame = tk.Frame()
+        self._message_receiver = MessageReceiver(master=self._second_row_frame)
         self._create_widgets()
         # call _exit fucntion when exits
         self._window.protocol("WM_DELETE_WINDOW", self._exit)
         self._window.grid_columnconfigure(1, weight=1)
         # start thread responsible to listen and receive file
         self._receive_thread = ReceiveThread(
-            host='', widget=self._files_widget.received_file, show_modal_func=self.show_password_modal)
+            host='', widget=self._files_widget.received_file, message_receiver=self._message_receiver,
+            show_modal_func=self.show_password_modal)
         self._receive_thread.start()
 
     def run(self):
@@ -66,16 +69,14 @@ class Application:
         self._settings_frame.pack(fill=tk.X, padx=10)
         # third column of the row 1 - text input
         # it is written to show gui (refactoring needed)
-        second_row_frame = tk.Frame()
-        text_input = tk.Entry(second_row_frame)
-        text_input.pack(side=tk.LEFT)
-        button = tk.Button(second_row_frame, text='send message')
-        button.pack(side=tk.LEFT)
-        received_message = tk.Label(second_row_frame, text='Received message')
-        received_message.pack(side=tk.LEFT, padx=100)
-        second_row_frame.pack(fill=tk.X, pady=40, padx=10)
+        self._message_sender = MessageSender(
+            master=self._second_row_frame, key=self._key, iv=self._init_vector,
+            progress_func=self._progress.set_progress, mode_chooser=self._mode_chooser, receiver_address=self._receiver_address)
+        self._message_sender.pack(side=tk.LEFT)
+        self._message_receiver.pack(side=tk.LEFT, pady=10)
+        self._second_row_frame.pack(fill=tk.X, pady=10, padx=10)
         # second row
-        self._files_widget.pack(pady=40)
+        self._files_widget.pack(fill=tk.X, pady=40)
         # third row
         self._progress.pack(fill=tk.X, pady=40, side=tk.BOTTOM)
         self._progress.pack_bar()
@@ -105,7 +106,7 @@ class Application:
         host = self._receiver_address.get()
         if host != '':
             send_key(host=self._receiver_address.get(),
-                    key=self._key, iv=self._init_vector.key)
+                     key=self._key, iv=self._init_vector.key)
         else:
             print('You have to specify a receiver IP address')
 
