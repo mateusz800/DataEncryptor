@@ -38,7 +38,7 @@ class FileEncryptor(Encryptor):
     Thread responsible for file encryption
     """
 
-    def __init__(self, key: str, iv: str, mode: str, text=None, file=None, progress_func=None, unlock_file_btns=None):
+    def __init__(self, file, key: str, iv: str, mode: str, progress_func=None, unlock_file_btns=None):
         super(FileEncryptor, self).__init__(key, iv, mode, progress_func)
         self._file = file
         self._unlock_btns_func = unlock_file_btns
@@ -66,7 +66,8 @@ class FileEncryptor(Encryptor):
                     fout.write(encd)
                     if self._progress_func:
                         self._progress_func(int((read_size/file_size) * 100))
-        self._unlock_btns_func()
+        if self._unlock_btns_func:
+            self._unlock_btns_func()
         return True
 
 
@@ -86,12 +87,14 @@ class MessageEncryptor(Encryptor):
         with open('temp/message_encrypted.txt', 'wb') as fout:
             fout.write(struct.pack('<Q', len(binary_message)))
             fout.write(self._iv)
-            
-            chunk_size =  256 # must be divided by 16
+
+            chunk_size = 256  # must be divided by 16
             read_size = 0  # how many is already read
-            for i in range(1, math.ceil(len(binary_message)/chunk_size)): # +2
-                encd = aes.encrypt(binary_message[(i-1)*chunk_size:i*chunk_size])
+            for i in range(1, math.ceil(len(binary_message)/chunk_size)):  # +2
+                encd = aes.encrypt(
+                    binary_message[(i-1)*chunk_size:i*chunk_size])
                 fout.write(encd)
                 if self._progress_func:
-                    self._progress_func(int((read_size/len(binary_message)) * 100))
+                    self._progress_func(
+                        int((read_size/len(binary_message)) * 100))
         return True

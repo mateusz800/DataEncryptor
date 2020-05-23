@@ -28,30 +28,31 @@ class MessageSender(tk.Frame):
         self._text_input.pack(side=tk.TOP, padx=10)
         self._button.pack(side=tk.RIGHT, padx=10)
 
-    def encrypt(self):
-        """
-        Encrypt the message
-        """
-        message = self._text_input.get('1.0', tk.END)
-        if self._key.key and self._iv.key:
-            encryptor = MessageEncryptor(self._key.key, self._iv.key, self._mode_chooser.get_active(),
-                                message, progress_func=self._progress_func)
-            encryptor.start()
-            encryptor.join()
-        else:
-            print('Keys are not generated')
-        
-
     def send(self):
         """
         Send written messages
         """
-        self.encrypt()
         mode = self._mode_chooser.get_active()
         host = self._receiver_address.get()
+        if not (self._key.key and self._iv.key):
+            print('Keys are not generated')
+            return
         if host:
-            message_file = File('temp/message.txt', encrypted_mode=mode)
-            send_thread = SendThread(message_file, mode=mode, host=host, show_progress_func=self._progress_func)
+            path = 'temp/message.txt'
+            self._save_message_to_file(path)
+            message_file = File(path)
+            message_file.encrypt(self._key.key, self._iv.key,
+                                 mode=mode, progress_func=self._progress_func)
+            send_thread = SendThread(
+                message_file, mode=mode, host=host, show_progress_func=self._progress_func)
             send_thread.start()
         else:
             print('You have to specify receiver IP address')
+
+    def _save_message_to_file(self, path):
+        """
+        Save message data to file given by a path
+        """
+        message = self._text_input.get('1.0', tk.END)
+        with open(path, 'w') as file:
+            file.write(message)

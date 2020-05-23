@@ -101,6 +101,7 @@ class Application:
         self._init_vector = Key(length=16)
         self._init_vector.key = iv
         self._files_widget.received_file.set_keys(key.key, iv)
+        self._message_receiver.set_keys(key.key, iv)
 
     def _send_key(self):
         host = self._receiver_address.get()
