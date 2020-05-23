@@ -100,8 +100,9 @@ class Application:
         self._key = key
         self._init_vector = Key(length=16)
         self._init_vector.key = iv
-        self._files_widget.received_file.set_keys(key.key, iv)
-        self._message_receiver.set_keys(key.key, iv)
+        self._files_widget.received_file.set_keys(self._key, self._init_vector)
+        self._message_receiver.set_keys(self._key, self._init_vector)
+        self._message_sender.set_keys(self._key, self._init_vector)
 
     def _send_key(self):
         host = self._receiver_address.get()

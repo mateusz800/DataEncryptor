@@ -93,6 +93,7 @@ class MessageEncryptor(Encryptor):
             for i in range(1, math.ceil(len(binary_message)/chunk_size)):  # +2
                 encd = aes.encrypt(
                     binary_message[(i-1)*chunk_size:i*chunk_size])
+                read_size += chunk_size
                 fout.write(encd)
                 if self._progress_func:
                     self._progress_func(

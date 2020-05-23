@@ -22,8 +22,11 @@ class MessageReceiver(tk.Frame):
         Set encrypted message
         """
         file = File(message_file, encrypted_mode=encrypted_mode)
-        file.encrypt(self._key, self._iv)
-        self._text_input.insert(tk.INSERT, file.encrypted)
+        file.decrypt(self._key.key, self._iv.key, mode=encrypted_mode)
+        self._text_input.config(state=tk.NORMAL)
+        self._text_input.delete("1.0", tk.END)
+        self._text_input.insert('1.0', file.data)
+        self._text_input.config(state=tk.DISABLED)
 
     def set_keys(self, key, iv):
         self._key = key

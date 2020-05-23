@@ -40,7 +40,9 @@ class ReceiveThread(threading.Thread):
             if not os.path.isdir('received_files'):
                 os.makedirs('received_files')
             with conn:
-                if self._key == None:
+                flag = conn.recv(1)
+                if flag:
+                    # receive key
                     try:
                         self._key = conn.recv(16)
                         iv = conn.recv(16)
@@ -48,8 +50,9 @@ class ReceiveThread(threading.Thread):
                     except TypeError as err:
                         pass
                 else:
+                    #receive file or message
                     file_name = conn.recv(1024).decode()
-                    if file_name != 'message_encrypted.txt':
+                    if file_name != 'message.txt':
                         # file receiving
                         path = f'received_files/{file_name}'
                         mode = conn.recv(3).decode()
@@ -63,13 +66,13 @@ class ReceiveThread(threading.Thread):
                     else:
                         # message receiving
                         mode = conn.recv(3).decode()
-                        with open('message_received.txt', 'wb') as file:
+                        with open('received_files/message_received.txt', 'wb') as file:
                             while True:
                                 data = conn.recv(1024)
                                 if not data:
                                     break
                                 file.write(data)
-                        self._message_receiver.set_message('message_received.txt', mode)
+                        self._message_receiver.set_message('received_files/message_received.txt', mode)
 
 
     def stop(self):

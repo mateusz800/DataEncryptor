@@ -41,6 +41,9 @@ class File:
         elif attr == 'encrypted_data':
             with open(f'temp/{self.name}_encrypted.{self.extension}', 'rb') as file:
                 return file.read()
+        elif attr == 'decrypted_data':
+            with open(f'temp/{self.name}_decrypted.{self.extension}', 'rb') as file:
+                return file.read()
         elif attr == 'size':
             return self.__calculate_size()
         else:

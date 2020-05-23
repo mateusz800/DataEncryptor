@@ -56,3 +56,7 @@ class MessageSender(tk.Frame):
         message = self._text_input.get('1.0', tk.END)
         with open(path, 'w') as file:
             file.write(message)
+
+    def set_keys(self, key, iv):
+        self._key = key
+        self._iv = iv
