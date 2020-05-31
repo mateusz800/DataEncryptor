@@ -88,6 +88,10 @@ class File:
         :param str iv: initialization vector
         :param str mode: cipher mode - default CBC
         """
+        # if already decrypted but with e.g. wrong password
+        if(self.name.split('_')[-1]=='decrypted'):
+            name = ''.join(self.name.split('_')[:-2])
+            self.path = f'{name}.{self.extension}'
 
         with open(f'received_files/{self.name}.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
