@@ -99,7 +99,7 @@ class Application:
         """
         Set received key as currents
         """
-        self.show_password_modal()
+
         self._key = key
         self._init_vector = Key(length=16)
         self._init_vector.key = iv
