@@ -40,8 +40,8 @@ class ReceiveThread(threading.Thread):
             if not os.path.isdir('received_files'):
                 os.makedirs('received_files')
             with conn:
-                flag = conn.recv(1)
-                if flag:
+                flag = conn.recv(len('0'.encode())).decode()
+                if flag == '1':
                     # receive key
                     try:
                         self._key = conn.recv(16)

@@ -2,19 +2,20 @@ import os
 import socket
 import threading
 import math
+import time
 
 from file import File
 from key import Key
 
 
-def send_key(host: str, key: Key, iv: bytes, port: int = 8080):
+def send_key(host: str, key: Key, iv: bytes,password:str, port: int = 8080):
     """
     Send encrypted keys to other machines
     """
-    encrypted_key = key.encrypt_with_password(iv, 'password')
+    encrypted_key = key.encrypt_with_password(iv, password)
     with socket.socket() as s:
         s.connect((host, port))
-        s.send(1)
+        s.send('1'.encode())
         s.send(encrypted_key)
         s.send(iv)
 
@@ -39,10 +40,11 @@ class SendThread(threading.Thread):
         sended = 0
         with socket.socket() as s:
             s.connect((self._host, self._port))
+            s.send('0'.encode())
+            time.sleep(.1)
             file_name = f'{self._file.name}.{self._file.extension}'
-            print(file_name)
-            s.send(0)
             s.send(file_name.encode())
+            time.sleep(.1)
             s.send(self._mode.encode())
             for i in range(steps):     
                 s.send(self._file.encrypted_data[sended:sended+chunk_size])

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
+import time
 
 from encryptor import MessageEncryptor
 from file import File
@@ -43,6 +44,7 @@ class MessageSender(tk.Frame):
             message_file = File(path)
             message_file.encrypt(self._key.key, self._iv.key,
                                  mode=mode, progress_func=self._progress_func)
+            time.sleep(.1)
             send_thread = SendThread(
                 message_file, mode=mode, host=host, show_progress_func=self._progress_func)
             send_thread.start()

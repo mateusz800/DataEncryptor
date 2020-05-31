@@ -85,6 +85,8 @@ class Application:
         """
         generate keys and save them to the text file
         """
+        self._password_modal = PasswordModalWindow(set_password_func=self.set_key_password)
+        self._password_modal.focus()
         self._key.generate()
         self._key.save_txt('temp/key.txt')
         self._init_vector.generate()
@@ -97,6 +99,7 @@ class Application:
         """
         Set received key as currents
         """
+        self.show_password_modal()
         self._key = key
         self._init_vector = Key(length=16)
         self._init_vector.key = iv
@@ -106,9 +109,11 @@ class Application:
 
     def _send_key(self):
         host = self._receiver_address.get()
-        if host != '':
+        if host != '' and self._key_password:
             send_key(host=self._receiver_address.get(),
-                     key=self._key, iv=self._init_vector.key)
+                     key=self._key, iv=self._init_vector.key, password=self._key_password)
+        elif self._key_password is None:
+            print("You have to specify password")
         else:
             print('You have to specify a receiver IP address')
 
@@ -129,6 +134,9 @@ class Application:
         self._password_modal = PasswordModalWindow(
             set_key_func=self.set_key, iv=iv, key_data=key_data)
         self._password_modal.focus()
+        
+    def set_key_password(self, password):
+        self._key_password = password
 
     def get_receiver_address(self):
         return self._receiver_address.get()
