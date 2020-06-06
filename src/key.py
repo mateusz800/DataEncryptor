@@ -30,7 +30,7 @@ class RSAKeys:
         with open("keys/rsa_key.bin", "rb") as file:
             encoded_key = file.read()
         key=RSA.importKey(encoded_key, passphrase = password)
-        return key.export.key()
+        return key
 
 
 class InitVector:
