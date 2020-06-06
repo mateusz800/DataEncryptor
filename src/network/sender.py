@@ -5,20 +5,18 @@ import math
 import time
 
 from file import File
-from key import Key
 
 
-def send_key(host: str, key: Key, iv: bytes,password:str, port: int = 8080):
-    """
-    Send encrypted keys to other machines
-    """
-    encrypted_key = key.encrypt_with_password(iv, password)
+def send_request_for_key(host:str, port:int=8080):
+     with socket.socket() as s:
+        s.connect((host, port))
+        s.send('2'.encode())
+
+def send_session_key(host:str, key:str, portLint=8080):
     with socket.socket() as s:
         s.connect((host, port))
-        s.send('1'.encode())
-        s.send(encrypted_key)
-        s.send(iv)
-
+        s.send('4'.encode())
+        s.send(key.encode())
 
 class SendThread(threading.Thread):
     def __init__(self, file, mode:str, host:str, port: int = 8080, show_progress_func=None):

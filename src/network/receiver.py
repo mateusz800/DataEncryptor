@@ -7,7 +7,7 @@ from components.message_receiver import MessageReceiver
 
 
 class ReceiveThread(threading.Thread):
-    def __init__(self, widget: ReceivedFile, message_receiver: MessageReceiver,  show_modal_func, host: str = '0.0.0.0', port: int = 8080):
+    def __init__(self, widget: ReceivedFile, message_receiver: MessageReceiver, get_public_key_func,  show_modal_func, host: str = '0.0.0.0', port: int = 8080):
         """
         :param  ReceivedFile widget: widget object that shows information about received file
         :param str host: ip address of the sender ,default to 0.0.0.0 what's mean all IPv4 addresses on the local machine)
@@ -20,6 +20,7 @@ class ReceiveThread(threading.Thread):
         self._file_widget = widget
         self._message_receiver = message_receiver
         self._show_modal_func = show_modal_func
+        self._get_public_key_func = get_public_key_func
         self._key = None
 
     def run(self):
@@ -41,15 +42,27 @@ class ReceiveThread(threading.Thread):
                 os.makedirs('received_files')
             with conn:
                 flag = conn.recv(len('0'.encode())).decode()
-                if flag == '1':
-                    # receive key
+                if flag == '4':
+                    # receive session key
                     try:
                         self._key = conn.recv(16)
                         iv = conn.recv(16)
                         self._show_modal_func(self._key, iv)
                     except TypeError as err:
                         pass
-                else:
+                elif flag == '2':
+                    # request for public key
+                    with open('temp/public_key.txt', 'rb') as file:
+                        s.send('3'.encode())
+                        s.send(file.read())
+                elif flag =='3':
+                    # get receiver public key
+                    key = conn.recv(2048)
+                    self._get_public_key_func(key)
+                elif flag =='4':
+                    # get session key
+                    pass
+                elif flag== '0':
                     #receive file or message
                     file_name = conn.recv(1024).decode()
                     if file_name != 'message.txt':

@@ -1,10 +1,10 @@
 import sys
 import tkinter as tk
 
-from key import Key
+from key import RSAKeys, InitVector, SessionKey
 from components import FilesRow, Progress, ModeChooser, MessageSender, MessageReceiver
 from components.password_modal_window import PasswordModalWindow
-from network import ReceiveThread, send_key
+from network import ReceiveThread, send_request_for_key, send_session_key
 
 
 class Application:
@@ -18,9 +18,11 @@ class Application:
         :param height: height of the window (default 200)
         """
         self._window = tk.Tk()
+        self._window.title("Projekt 1 - Mateusz Budnik, Paweł Żurek")
         self._window.resizable(False, False)
-        self._key = Key(length=16)
-        self._init_vector = Key(length=16)
+        self._keys = RSAKeys()
+        self._init_vector = InitVector()
+        self._session_key = SessionKey()
         self._window.geometry('{}x{}'.format(width, height))
         self._progress = Progress(self._window)
         self._settings_frame = tk.Frame(self._window)
@@ -37,7 +39,7 @@ class Application:
         # start thread responsible to listen and receive file
         self._receive_thread = ReceiveThread(
             host='', widget=self._files_widget.received_file, message_receiver=self._message_receiver,
-            show_modal_func=self.show_password_modal)
+            get_public_key_func=self.get_receiver_public_key, show_modal_func=self.show_password_modal)
         self._receive_thread.start()
 
     def run(self):
@@ -64,13 +66,15 @@ class Application:
         self._receiver_address = tk.Entry(receiver_address_col)
         self._receiver_address.pack(side=tk.BOTTOM)
         receiver_address_col.pack(side=tk.LEFT, padx=20)
+        self._get_receiver_key_btn = tk.Button(
+            self._settings_frame, command=self._send_request_for_public_key)
         # third column of the row 1 - cipher mode
         self._mode_chooser.pack(side=tk.LEFT, padx=20)
         self._settings_frame.pack(fill=tk.X, padx=10)
         # third column of the row 1 - text input
         # it is written to show gui (refactoring needed)
         self._message_sender = MessageSender(
-            master=self._second_row_frame, key=self._key, iv=self._init_vector,
+            master=self._second_row_frame, key=self._session_key, iv=self._init_vector,
             progress_func=self._progress.set_progress, mode_chooser=self._mode_chooser, receiver_address=self._receiver_address)
         self._message_sender.pack(side=tk.LEFT)
         self._message_receiver.pack(side=tk.LEFT, pady=10)
@@ -81,38 +85,37 @@ class Application:
         self._progress.pack(fill=tk.X, pady=40, side=tk.BOTTOM)
         self._progress.pack_bar()
 
+    def _send_request_for_public_key(self):
+        send_request_for_key(host=self._receiver_address.get())
+
     def _generate_key(self):
         """
         generate keys and save them to the text file
         """
-        self._password_modal = PasswordModalWindow(set_password_func=self.set_key_password)
-        self._password_modal.focus()
-        self._key.generate()
-        self._key.save_txt('temp/key.txt')
         self._init_vector.generate()
-        self._init_vector.save_txt('temp/init_vector.txt')
-        self._files_widget.local_file.add_keys(
-            self._key.key, self._init_vector.key)
-        self._send_key_btn.config(state=tk.NORMAL)
+        self._password_modal = PasswordModalWindow(
+            set_password_func=self.set_key_password)
+        self._password_modal.focus()
 
     def set_key(self, key, iv):
         """
         Set received key as currents
         """
-
-        self._key = key
+        self._session_key = key
+        self._session_key.decrypt_with_password(iv, self._private_key.key)
         self._init_vector = Key(length=16)
-        self._init_vector.key = iv
-        self._files_widget.received_file.set_keys(self._key, self._init_vector)
-        self._message_receiver.set_keys(self._key, self._init_vector)
-        self._message_sender.set_keys(self._key, self._init_vector)
+        self._init_vector.key = iv 
+        self._files_widget.received_file.set_keys(
+            self._session_key, self._init_vector)
+        self._message_receiver.set_keys(self._session_key, self._init_vector)
+        self._message_sender.set_keys(self._session_key, self._init_vector)
 
     def _send_key(self):
         host = self._receiver_address.get()
-        if host != '' and self._key_password:
+        if host != '' and self._password:
             send_key(host=self._receiver_address.get(),
-                     key=self._key, iv=self._init_vector.key, password=self._key_password)
-        elif self._key_password is None:
+                     key=self._session_key, iv=self._init_vector.key, password=self._password)
+        elif self._password is None:
             print("You have to specify password")
         else:
             print('You have to specify a receiver IP address')
@@ -132,11 +135,21 @@ class Application:
         :param bytes key_data: received encoded key in bytes
         """
         self._password_modal = PasswordModalWindow(
-            set_key_func=self.set_key, iv=iv, key_data=key_data)
+            set_password_func=self.set_key_password)
         self._password_modal.focus()
-        
+
     def set_key_password(self, password):
-        self._key_password = password
+        self._password = password
+        self._keys.generate(password)
+        self._send_key_btn.config(state=tk.NORMAL)
 
     def get_receiver_address(self):
         return self._receiver_address.get()
+
+    def get_receiver_public_key(self, key):
+        self._receiver_public_key = key
+        self._session_key.generate()
+        self._files_widget.local_file.add_keys(
+            self._session_key.key, self._init_vector.key)
+        encrypted = self._session_key.encrypt_with_password(key)
+        send_session_key(self._receiver_address.get(), encrypted)

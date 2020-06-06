@@ -1,6 +1,5 @@
 import tkinter as tk
-
-from key import Key
+import hashlib
 
 
 class PasswordModalWindow(tk.Toplevel):
@@ -9,12 +8,10 @@ class PasswordModalWindow(tk.Toplevel):
     password needed to decrypt key
     """
 
-    def __init__(self, set_password_func=None, set_key_func=None, iv: str=None, key_data:bytes = None):
+    def __init__(self, set_password_func=None):
         super(PasswordModalWindow, self).__init__()
-        self._set_key_func = set_key_func
+        self.title("Password")
         self._set_password_func = set_password_func
-        self._key_data = key_data
-        self._iv = iv
         self._input = tk.Entry(self)
         self._submit_btn = tk.Button(self, text='submit', command=self._submit)
         self._input.pack()
@@ -25,11 +22,7 @@ class PasswordModalWindow(tk.Toplevel):
         Submit password and encrypt received key
         """
         password = self._input.get()
-        if self._key_data is not None and self._set_key_func is not None:
-            key = Key(length=16)
-            key.decrypt_with_password(self._key_data, password=password, iv=self._iv)
-            self._set_key_func(key, self._iv)
-        elif self._set_password_func is not None:
-            self._set_password_func(password)
-
+        hash_password = hashlib.sha256()
+        hash_password.update(password.encode())
+        self._set_password_func(hash_password.hexdigest())
         self.destroy()
