@@ -12,11 +12,11 @@ def send_request_for_key(host:str, port:int=8080):
         s.connect((host, port))
         s.send('2'.encode())
 
-def send_session_key(host:str, key:str, portLint=8080):
+def send_session_key(host:str, key:str, port:int=8080):
     with socket.socket() as s:
         s.connect((host, port))
         s.send('4'.encode())
-        s.send(key.encode())
+        s.send(key)
 
 class SendThread(threading.Thread):
     def __init__(self, file, mode:str, host:str, port: int = 8080, show_progress_func=None):

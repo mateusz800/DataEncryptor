@@ -1,6 +1,8 @@
 import sys
 import tkinter as tk
 
+from Crypto.PublicKey import RSA
+
 from key import RSAKeys, InitVector, SessionKey
 from components import FilesRow, Progress, ModeChooser, MessageSender, MessageReceiver
 from components.password_modal_window import PasswordModalWindow
@@ -39,7 +41,8 @@ class Application:
         # start thread responsible to listen and receive file
         self._receive_thread = ReceiveThread(
             host='', widget=self._files_widget.received_file, message_receiver=self._message_receiver,
-            get_public_key_func=self.get_receiver_public_key, show_modal_func=self.show_password_modal)
+            get_public_key_func=self.get_receiver_public_key, decrypt_session_key_func=self.decrypt_session_key,
+            show_modal_func=self.show_password_modal)
         self._receive_thread.start()
 
     def run(self):
@@ -56,7 +59,7 @@ class Application:
             key_frame, text='generate new key', command=self._generate_key)
         self._generate_key_btn.pack(fill=tk.X)
         self._send_key_btn = tk.Button(
-            key_frame, text='send key', state=tk.DISABLED, command=self._send_key)
+            key_frame, text='send key', state=tk.DISABLED, command=self._send_request_for_public_key)
         self._send_key_btn.pack(fill=tk.X)
         key_frame.pack(side=tk.LEFT)
         # second column of the row 1 - receiver address
@@ -66,8 +69,6 @@ class Application:
         self._receiver_address = tk.Entry(receiver_address_col)
         self._receiver_address.pack(side=tk.BOTTOM)
         receiver_address_col.pack(side=tk.LEFT, padx=20)
-        self._get_receiver_key_btn = tk.Button(
-            self._settings_frame, command=self._send_request_for_public_key)
         # third column of the row 1 - cipher mode
         self._mode_chooser.pack(side=tk.LEFT, padx=20)
         self._settings_frame.pack(fill=tk.X, padx=10)
@@ -104,13 +105,14 @@ class Application:
         self._session_key = key
         self._session_key.decrypt_with_password(iv, self._private_key.key)
         self._init_vector = Key(length=16)
-        self._init_vector.key = iv 
+        self._init_vector.key = iv
         self._files_widget.received_file.set_keys(
             self._session_key, self._init_vector)
         self._message_receiver.set_keys(self._session_key, self._init_vector)
         self._message_sender.set_keys(self._session_key, self._init_vector)
 
     def _send_key(self):
+        # niepotrzebne
         host = self._receiver_address.get()
         if host != '' and self._password:
             send_key(host=self._receiver_address.get(),
@@ -147,9 +149,15 @@ class Application:
         return self._receiver_address.get()
 
     def get_receiver_public_key(self, key):
-        self._receiver_public_key = key
+        self._receiver_public_key = RSA.importKey(key).publickey()
         self._session_key.generate()
         self._files_widget.local_file.add_keys(
             self._session_key.key, self._init_vector.key)
-        encrypted = self._session_key.encrypt_with_password(key)
+        encrypted = self._session_key.encrypt_with_key(
+            self._receiver_public_key)
         send_session_key(self._receiver_address.get(), encrypted)
+
+    def decrypt_session_key(self, session_key):
+        private_key = self._keys.decrypt_private_key(self._password)
+        self._session_key.decrypt_with_key(session_key, private_key)
+

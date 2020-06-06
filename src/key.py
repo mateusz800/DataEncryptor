@@ -1,7 +1,7 @@
 import random
 
 from Crypto import PublicKey, Random
-from Crypto.Cipher import AES
+from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.PublicKey import RSA
 
 
@@ -27,7 +27,8 @@ class RSAKeys:
             file.write(self.key)
 
     def decrypt_private_key(self, password):
-        encoded_key=open("keys/rsa_key.bin", "rb").read()
+        with open("keys/rsa_key.bin", "rb") as file:
+            encoded_key = file.read()
         key=RSA.importKey(encoded_key, passphrase = password)
         return key.export.key()
 
@@ -46,4 +47,13 @@ class SessionKey:
 
     def generate(self):
         rndfile=Random.new()
-        self.key=rndfile.read(1024)
+        self.key=rndfile.read(64)
+    
+    def encrypt_with_key(self, key):
+        cipher_rsa = PKCS1_OAEP.new(key)
+        enc_session_key = cipher_rsa.encrypt(self.key)
+        return enc_session_key
+
+    def decrypt_with_key(self, session_key, private_key):
+        cipher_rsa = PKCS1_OAEP.new(private_key)
+        self.key = cipher_rsa.decrypt(session_key)

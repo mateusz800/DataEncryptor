@@ -7,7 +7,7 @@ from components.message_receiver import MessageReceiver
 
 
 class ReceiveThread(threading.Thread):
-    def __init__(self, widget: ReceivedFile, message_receiver: MessageReceiver, get_public_key_func,  show_modal_func, host: str = '0.0.0.0', port: int = 8080):
+    def __init__(self, widget: ReceivedFile, message_receiver: MessageReceiver, get_public_key_func, decrypt_session_key_func , show_modal_func, host: str = '0.0.0.0', port: int = 8080):
         """
         :param  ReceivedFile widget: widget object that shows information about received file
         :param str host: ip address of the sender ,default to 0.0.0.0 what's mean all IPv4 addresses on the local machine)
@@ -21,6 +21,7 @@ class ReceiveThread(threading.Thread):
         self._message_receiver = message_receiver
         self._show_modal_func = show_modal_func
         self._get_public_key_func = get_public_key_func
+        self._decrypt_session_key_func = decrypt_session_key_func 
         self._key = None
         self._send_key = False
         self._send_host = ''
@@ -75,7 +76,8 @@ class ReceiveThread(threading.Thread):
                     self._get_public_key_func(key)
                 elif flag =='4':
                     # get session key
-                    pass
+                    enc_session_key = conn.recv(2048)
+                    self._decrypt_session_key_func(enc_session_key)
                 elif flag== '0':
                     #receive file or message
                     file_name = conn.recv(1024).decode()
