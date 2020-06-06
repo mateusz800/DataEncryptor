@@ -22,6 +22,10 @@ class ReceiveThread(threading.Thread):
         self._show_modal_func = show_modal_func
         self._get_public_key_func = get_public_key_func
         self._key = None
+        self._send_key = False
+        self._send_host = ''
+        self._send_port = ''
+
 
     def run(self):
         """
@@ -29,15 +33,26 @@ class ReceiveThread(threading.Thread):
         It in infinite loop waits for connection and when the connection will
         be established receive the data and write it to the file.
         """
+        
         self._running = True
         self._socket.bind((self._host, self._port))
         self._socket.listen()
         while self._running:
+            if self._send_key:
+                with socket.socket() as s:
+                    with open('keys/public_key.txt', 'rb') as file:
+                        key = file.read()
+                    s.connect((self._send_host, self._send_port))
+                    s.send('3'.encode())
+                    s.send(key)
+                self._send_key = False
             try:
                 conn, addr = self._socket.accept()
             except ConnectionAbortedError:
                 break
             print('Got connection from ', addr)
+            self._send_port = self._port
+            self._send_host = addr[0]
             if not os.path.isdir('received_files'):
                 os.makedirs('received_files')
             with conn:
@@ -52,9 +67,8 @@ class ReceiveThread(threading.Thread):
                         pass
                 elif flag == '2':
                     # request for public key
-                    with open('temp/public_key.txt', 'rb') as file:
-                        s.send('3'.encode())
-                        s.send(file.read())
+                    self._send_key = True
+                    # set the flag to true and send key (implementation above)
                 elif flag =='3':
                     # get receiver public key
                     key = conn.recv(2048)
