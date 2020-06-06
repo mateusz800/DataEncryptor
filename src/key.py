@@ -18,7 +18,7 @@ class RSAKeys:
         Generate pair of keys.
         Encrypt private key with given password and save it to file
         """
-        key = RSA.generate(2048)
+        key = RSA.generate(1024)
         private_key = key.exportKey(passphrase=password, pkcs=8)
         with open ("keys/rsa_key.bin", "wb+") as file:
             file.write(private_key)
@@ -47,7 +47,7 @@ class SessionKey:
 
     def generate(self):
         rndfile=Random.new()
-        self.key=rndfile.read(64)
+        self.key=rndfile.read(32)
     
     def encrypt_with_key(self, key):
         cipher_rsa = PKCS1_OAEP.new(key)

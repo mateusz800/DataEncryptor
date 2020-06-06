@@ -72,11 +72,11 @@ class ReceiveThread(threading.Thread):
                     # set the flag to true and send key (implementation above)
                 elif flag =='3':
                     # get receiver public key
-                    key = conn.recv(2048)
+                    key = conn.recv(1024)
                     self._get_public_key_func(key)
                 elif flag =='4':
                     # get session key
-                    enc_session_key = conn.recv(2048)
+                    enc_session_key = conn.recv(1024)
                     self._decrypt_session_key_func(enc_session_key)
                 elif flag== '0':
                     #receive file or message

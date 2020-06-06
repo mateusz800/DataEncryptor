@@ -74,6 +74,7 @@ class File:
             mode = self._encrypted_mode
         encryption_thread = FileEncryptor(
             self, key, iv, mode, progress_func, unlock_btns_func)
+        print(len(key))
         encryption_thread.start()
         self.encrypted = True
         return self.encrypted
