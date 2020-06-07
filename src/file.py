@@ -74,7 +74,6 @@ class File:
             mode = self._encrypted_mode
         encryption_thread = FileEncryptor(
             self, key, iv, mode, progress_func, unlock_btns_func)
-        print(len(key))
         encryption_thread.start()
         self.encrypted = True
         return self.encrypted
@@ -91,7 +90,7 @@ class File:
         """
         # if already decrypted but with e.g. wrong password
         if(self.name.split('_')[-1]=='decrypted'):
-            name = ''.join(self.name.split('_')[:-2])
+            name = self.name.replace('_decrypted', '')
             self.path = f'{name}.{self.extension}'
 
         with open(f'files/{self.name}.{self.extension}', 'rb') as fin:

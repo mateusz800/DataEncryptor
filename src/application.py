@@ -31,7 +31,8 @@ class Application:
         self._mode_chooser = ModeChooser(master=self._settings_frame)
         self._receiver_address = tk.Entry(self._settings_frame)
         self._files_widget = FilesRow(progress_bar=self._progress, receiver_address=self.get_receiver_address,
-                                      mode_chooser=self._mode_chooser, show_modal_func=self.show_password_modal, master=self._window)
+                                      mode_chooser=self._mode_chooser, show_modal_func=self.show_password_modal, decrypt_key_func=self.redecrypt_session_key,
+                                       master=self._window)
         self._second_row_frame = tk.Frame()
         self._message_receiver = MessageReceiver(master=self._second_row_frame)
         self._create_widgets()
@@ -130,14 +131,14 @@ class Application:
         self._receive_thread.stop()
         self._receive_thread.join()
 
-    def show_password_modal(self):
+    def show_password_modal(self, onsubmit=None, decrypt_key_func=None):
         """
         Show modal window with form in which user have to type password
 
         :param bytes key_data: received encoded key in bytes
         """
         self._password_modal = PasswordModalWindow(
-            set_password_func=self.set_key_password)
+            set_password_func=self.set_key_password, onsubmit=onsubmit, decrypt_key_func=decrypt_key_func)
         self._password_modal.focus()
 
     def set_key_password(self, password):
@@ -151,8 +152,10 @@ class Application:
     def get_receiver_public_key(self, key):
         self._receiver_public_key = RSA.importKey(key).publickey()
         self._session_key.generate()
-        self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
-        self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
+        self._message_receiver.set_keys(
+            self._session_key.key, self._init_vector.key)
+        self._files_widget.received_file.set_keys(
+            self._session_key.key, self._init_vector.key)
         self._files_widget.local_file.add_keys(
             self._session_key.key, self._init_vector.key)
         encrypted = self._session_key.encrypt_with_key(
@@ -162,7 +165,14 @@ class Application:
     def decrypt_session_key(self, session_key):
         private_key = self._keys.decrypt_private_key(self._password)
         self._session_key.decrypt_with_key(session_key, private_key)
-        self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
-        self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
-        self._files_widget.local_file.add_keys(self._session_key.key, self._init_vector.key)
+        self._message_receiver.set_keys(
+            self._session_key.key, self._init_vector.key)
+        self._files_widget.received_file.set_keys(
+            self._session_key.key, self._init_vector.key)
+        self._files_widget.local_file.add_keys(
+            self._session_key.key, self._init_vector.key)
 
+    def redecrypt_session_key(self, password):
+        self._password = password
+        print(len(self._session_key.key))
+        self.decrypt_session_key(self._session_key.encrypted_key)

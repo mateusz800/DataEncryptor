@@ -8,8 +8,10 @@ class PasswordModalWindow(tk.Toplevel):
     password needed to decrypt key
     """
 
-    def __init__(self, set_password_func=None):
+    def __init__(self, set_password_func=None, onsubmit=None, decrypt_key_func=None):
         super(PasswordModalWindow, self).__init__()
+        self._onsubmit = onsubmit
+        self._decrypt_key_func = decrypt_key_func
         self.title("Password")
         self._set_password_func = set_password_func
         self._input = tk.Entry(self)
@@ -24,5 +26,10 @@ class PasswordModalWindow(tk.Toplevel):
         password = self._input.get()
         hash_password = hashlib.sha256()
         hash_password.update(password.encode())
-        self._set_password_func(hash_password.hexdigest())
+        if self._onsubmit:
+            self._decrypt_key_func(hash_password.hexdigest())
+            self._onsubmit.decrypt()
+        else:
+            self._set_password_func(hash_password.hexdigest())
+      
         self.destroy()
