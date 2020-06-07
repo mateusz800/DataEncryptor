@@ -12,8 +12,9 @@ class ReceivedFile(FileWidget):
     Shows received file information, and makes some operations on that file available
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, show_password_modal_func, *args, **kwargs):
         super(ReceivedFile, self).__init__('Received file', *args, **kwargs)
+        self._show_password_modal_func = show_password_modal_func
         self._lock_buttons()
 
     def _pack_buttons(self):
@@ -41,7 +42,7 @@ class ReceivedFile(FileWidget):
         """
         Decrypt received file. 
         """
-        
+        self._show_password_modal_func()
         self._current_file.decrypt(self._key.key, self._iv.key)
         self._open_decrypted_btn.config(state=tk.NORMAL)
 

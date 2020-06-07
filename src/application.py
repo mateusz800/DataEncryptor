@@ -31,7 +31,7 @@ class Application:
         self._mode_chooser = ModeChooser(master=self._settings_frame)
         self._receiver_address = tk.Entry(self._settings_frame)
         self._files_widget = FilesRow(progress_bar=self._progress, receiver_address=self.get_receiver_address,
-                                      mode_chooser=self._mode_chooser, master=self._window)
+                                      mode_chooser=self._mode_chooser, show_modal_func=self.show_password_modal, master=self._window)
         self._second_row_frame = tk.Frame()
         self._message_receiver = MessageReceiver(master=self._second_row_frame)
         self._create_widgets()
@@ -130,7 +130,7 @@ class Application:
         self._receive_thread.stop()
         self._receive_thread.join()
 
-    def show_password_modal(self, key_data: bytes, iv: bytes):
+    def show_password_modal(self):
         """
         Show modal window with form in which user have to type password
 
@@ -151,6 +151,8 @@ class Application:
     def get_receiver_public_key(self, key):
         self._receiver_public_key = RSA.importKey(key).publickey()
         self._session_key.generate()
+        self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
+        self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
         self._files_widget.local_file.add_keys(
             self._session_key.key, self._init_vector.key)
         encrypted = self._session_key.encrypt_with_key(
@@ -161,4 +163,6 @@ class Application:
         private_key = self._keys.decrypt_private_key(self._password)
         self._session_key.decrypt_with_key(session_key, private_key)
         self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
+        self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
+        self._files_widget.local_file.set_keys(self._session_key.key, self._init_vector.key)
 
