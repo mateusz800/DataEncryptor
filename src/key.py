@@ -27,10 +27,10 @@ class RSAKeys:
             file.write(self.key)
 
     def decrypt_private_key(self, password):
-        with open("keys/rsa_key.bin", "rb") as file:
+        with open("temp/rsa_key.txt", "rb") as file:
             encoded_key = file.read()
         key=RSA.importKey(encoded_key, passphrase = password)
-        return key.export.key()
+        return key
 
 
 class InitVector:
