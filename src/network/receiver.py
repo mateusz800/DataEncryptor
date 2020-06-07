@@ -58,15 +58,7 @@ class ReceiveThread(threading.Thread):
                 os.makedirs('files')
             with conn:
                 flag = conn.recv(len('0'.encode())).decode()
-                if flag == '4':
-                    # receive session key
-                    try:
-                        self._key = conn.recv(16)
-                        iv = conn.recv(16)
-                        self._show_modal_func(self._key, iv)
-                    except TypeError as err:
-                        pass
-                elif flag == '2':
+                if flag == '2':
                     # request for public key
                     self._send_key = True
                     # set the flag to true and send key (implementation above)
