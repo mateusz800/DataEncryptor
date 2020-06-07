@@ -59,7 +59,7 @@ class Application:
             key_frame, text='generate new key', command=self._generate_key)
         self._generate_key_btn.pack(fill=tk.X)
         self._send_key_btn = tk.Button(
-            key_frame, text='send key', state=tk.DISABLED, command=self._send_request_for_public_key)
+            key_frame, text='send session key', state=tk.DISABLED, command=self._send_request_for_public_key)
         self._send_key_btn.pack(fill=tk.X)
         key_frame.pack(side=tk.LEFT)
         # second column of the row 1 - receiver address

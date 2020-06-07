@@ -39,7 +39,7 @@ class MessageSender(tk.Frame):
             print('Keys are not generated')
             return
         if host:
-            path = 'temp/message.txt'
+            path = 'files/message.txt'
             self._save_message_to_file(path)
             message_file = File(path)
             message_file.encrypt(self._key.key, self._iv.key,

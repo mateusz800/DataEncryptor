@@ -39,10 +39,10 @@ class File:
             with open(self.path, 'r') as file:
                 return file.read()
         elif attr == 'encrypted_data':
-            with open(f'temp/{self.name}_encrypted.{self.extension}', 'rb') as file:
+            with open(f'files/{self.name}_encrypted.{self.extension}', 'rb') as file:
                 return file.read()
         elif attr == 'decrypted_data':
-            with open(f'temp/{self.name}_decrypted.{self.extension}', 'rb') as file:
+            with open(f'files/{self.name}_decrypted.{self.extension}', 'rb') as file:
                 return file.read()
         elif attr == 'size':
             return self.__calculate_size()
@@ -94,11 +94,11 @@ class File:
             name = ''.join(self.name.split('_')[:-2])
             self.path = f'{name}.{self.extension}'
 
-        with open(f'received_files/{self.name}.{self.extension}', 'rb') as fin:
+        with open(f'files/{self.name}.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
             iv = fin.read(16)
             aes = AES.new(key, self._get_aes_mode(mode), iv)
-            self.path = f'temp/{self.name}_decrypted.{self.extension}'
+            self.path = f'files/{self.name}_decrypted.{self.extension}'
             with open(self.path, 'wb') as fout:
                 while True:
                     data = fin.read(-1)

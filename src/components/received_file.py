@@ -41,6 +41,7 @@ class ReceivedFile(FileWidget):
         """
         Decrypt received file. 
         """
+        
         self._current_file.decrypt(self._key.key, self._iv.key)
         self._open_decrypted_btn.config(state=tk.NORMAL)
 

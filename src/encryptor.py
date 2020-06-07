@@ -47,7 +47,7 @@ class FileEncryptor(Encryptor):
         # for now only AES cipher
         aes = self._get_aes()
         file_size = os.path.getsize(self._file.path)
-        with open(f'temp/{self._file.name}_encrypted.{self._file.extension}', 'wb') as fout:
+        with open(f'files/{self._file.name}_encrypted.{self._file.extension}', 'wb') as fout:
             fout.write(struct.pack('<Q', file_size))
             fout.write(self._iv)
             with open(self._file.path, 'rb') as fin:
@@ -84,7 +84,7 @@ class MessageEncryptor(Encryptor):
         # for now only AES cipher
         aes = self._get_aes()
         binary_message = self._message.encode()
-        with open('temp/message_encrypted.txt', 'wb') as fout:
+        with open('files/message_encrypted.txt', 'wb') as fout:
             fout.write(struct.pack('<Q', len(binary_message)))
             fout.write(self._iv)
 

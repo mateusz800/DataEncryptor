@@ -20,7 +20,7 @@ class RSAKeys:
         """
         key = RSA.generate(1024)
         private_key = key.exportKey(passphrase=password, pkcs=8)
-        with open ("keys/rsa_key.bin", "wb+") as file:
+        with open ("temp/rsa_key.txt", "wb+") as file:
             file.write(private_key)
         self.key = key.publickey().exportKey()
         with open ("keys/public_key.txt", "wb+") as file:

@@ -54,8 +54,8 @@ class ReceiveThread(threading.Thread):
             print('Got connection from ', addr)
             self._send_port = self._port
             self._send_host = addr[0]
-            if not os.path.isdir('received_files'):
-                os.makedirs('received_files')
+            if not os.path.isdir('files'):
+                os.makedirs('files')
             with conn:
                 flag = conn.recv(len('0'.encode())).decode()
                 if flag == '4':
@@ -83,7 +83,7 @@ class ReceiveThread(threading.Thread):
                     file_name = conn.recv(1024).decode()
                     if file_name != 'message.txt':
                         # file receiving
-                        path = f'received_files/{file_name}'
+                        path = f'files/{file_name}'
                         mode = conn.recv(3).decode()
                         with open(path, 'wb') as file:
                             while True:
@@ -95,13 +95,13 @@ class ReceiveThread(threading.Thread):
                     else:
                         # message receiving
                         mode = conn.recv(3).decode()
-                        with open('received_files/message_received.txt', 'wb') as file:
+                        with open('files/message_received.txt', 'wb') as file:
                             while True:
                                 data = conn.recv(1024)
                                 if not data:
                                     break
                                 file.write(data)
-                        self._message_receiver.set_message('received_files/message_received.txt', mode)
+                        self._message_receiver.set_message('files/message_received.txt', mode)
 
 
     def stop(self):
