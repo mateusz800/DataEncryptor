@@ -164,5 +164,5 @@ class Application:
         self._session_key.decrypt_with_key(session_key, private_key)
         self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
         self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
-        self._files_widget.local_file.set_keys(self._session_key.key, self._init_vector.key)
+        self._files_widget.local_file.add_keys(self._session_key.key, self._init_vector.key)
 
