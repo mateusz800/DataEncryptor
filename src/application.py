@@ -102,7 +102,7 @@ class Application:
         """
         Set received key as currents
         """
-        self._session_key = key
+        self._session_key.key = key
         self._session_key.decrypt_with_password(iv, self._private_key.key)
         self._init_vector = InitVector()
         self._init_vector.key = iv
@@ -153,6 +153,8 @@ class Application:
         self._session_key.generate()
         self._files_widget.local_file.add_keys(
             self._session_key.key, self._init_vector.key)
+        self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
+        self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
         encrypted = self._session_key.encrypt_with_key(
             self._receiver_public_key)
         send_session_key(self._receiver_address.get(), encrypted)
@@ -161,4 +163,4 @@ class Application:
         private_key = self._keys.decrypt_private_key(self._password)
         self._session_key.decrypt_with_key(session_key, private_key)
         self._message_receiver.set_keys(self._session_key.key, self._init_vector.key)
-
+        self._files_widget.received_file.set_keys(self._session_key.key, self._init_vector.key)
