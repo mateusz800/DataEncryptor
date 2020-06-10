@@ -1,5 +1,6 @@
 import struct
 import os
+import time
 
 from Crypto.Cipher import AES
 
@@ -79,19 +80,13 @@ class File:
         return self.encrypted
 
     def decrypt(self, key: str, iv: str, mode: str = 'CBC'):
-        """
-        Decrypt the file and save it to a file
-        Key and initialization vector parameters are required
-        If key or initailization vector is not passed the exception will raise
-
-        :param str key: key to data ecryption and decryption
-        :param str iv: initialization vector
-        :param str mode: cipher mode - default CBC
-        """
         # if already decrypted but with e.g. wrong password
         if(self.name.split('_')[-1]=='decrypted'):
             name = self.name.replace('_decrypted', '')
             self.path = f'{name}.{self.extension}'
+
+        if self._encrypted_mode:
+            mode = self._encrypted_mode
 
         with open(f'files/{self.name}.{self.extension}', 'rb') as fin:
             file_size = struct.unpack('<Q', fin.read(struct.calcsize('<Q')))[0]
@@ -99,6 +94,7 @@ class File:
             aes = AES.new(key, self._get_aes_mode(mode), iv)
             self.path = f'files/{self.name}_decrypted.{self.extension}'
             with open(self.path, 'wb') as fout:
+                start = time.time()
                 while True:
                     data = fin.read(-1)
                     n = len(data)
@@ -111,6 +107,9 @@ class File:
                     n = len(decd)
                     fout.write(decd[:file_size])
                     file_size -= n
+                stop = time.time()
+                t = stop-start
+                print('Czas {}'.format(t))
 
     def _get_aes_mode(self, mode: str):
         """

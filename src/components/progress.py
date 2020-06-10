@@ -25,5 +25,7 @@ class Progress(tk.Frame):
         """
         :param int value: progress value in %
         """
+        if value > 100:
+            value = 100
         self._bar["value"] = value
         self._text.set(f'{value}%')

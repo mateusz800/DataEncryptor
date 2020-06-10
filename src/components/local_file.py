@@ -36,6 +36,9 @@ class LocalFile(FileWidget):
         self._encrypt_btn = tk.Button(
             self, text='encrypt', command=self._encrypt, state=tk.DISABLED)
         self._encrypt_btn.pack(side=tk.LEFT)
+        self._decrypt_btn = tk.Button(
+            self, text='decrypt', command=self._decrypt, state=tk.DISABLED)
+        self._decrypt_btn.pack(side=tk.LEFT)
         self._send_btn = tk.Button(
             self, text='send', command=self._send, state=tk.DISABLED)
         self._send_btn.pack(side=tk.LEFT)
@@ -54,6 +57,7 @@ class LocalFile(FileWidget):
         """
         self._open_btn.config(state=tk.NORMAL)
         self._encrypt_btn.config(state=tk.NORMAL)
+        self._decrypt_btn.config(state=tk.NORMAL)
         self._file_btn.config(state=tk.NORMAL)
 
     def _lock_buttons(self):
@@ -76,6 +80,9 @@ class LocalFile(FileWidget):
             # show message that user didn't generate keys
             print('keys are not generated')
         
+    def _decrypt(self):
+        file = File(f"{self._current_file.name}_encrypted.{self._current_file.extension}", True)
+        file.decrypt(self._key, self._iv, mode=self._mode_chooser.get_active())
 
     def _send(self):
         """

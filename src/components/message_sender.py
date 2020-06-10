@@ -52,7 +52,7 @@ class MessageSender(tk.Frame):
             print('You have to specify receiver IP address')
 
     def _save_message_to_file(self, path):
-        """
+        """ 
         Save message data to file given by a path
         """
         message = self._text_input.get('1.0', tk.END)

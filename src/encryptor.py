@@ -2,6 +2,7 @@ import threading
 import struct
 import os
 import math
+import time
 
 from Crypto.Cipher import AES
 
@@ -51,8 +52,11 @@ class FileEncryptor(Encryptor):
             fout.write(struct.pack('<Q', file_size))
             fout.write(self._iv)
             with open(self._file.path, 'rb') as fin:
-                chunk_size = 2048  # must be divided by 16
+                chunk_size = 2048  
                 read_size = 0  # how many is already read
+
+                start = time.time()
+
                 while True:
                     data = fin.read(chunk_size)
                     n = len(data)
@@ -66,6 +70,10 @@ class FileEncryptor(Encryptor):
                     fout.write(encd)
                     if self._progress_func:
                         self._progress_func(int((read_size/file_size) * 100))
+                stop = time.time()
+                t = stop-start
+                print('Czas {}'.format(t))
+
         if self._unlock_btns_func:
             self._unlock_btns_func()
         return True
@@ -98,4 +106,5 @@ class MessageEncryptor(Encryptor):
                 if self._progress_func:
                     self._progress_func(
                         int((read_size/len(binary_message)) * 100))
+               
         return True

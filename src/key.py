@@ -66,9 +66,12 @@ class SessionKey:
     def decrypt_with_key(self, session_key, private_key):
         self.encrypted_key = session_key
         cipher_rsa = PKCS1_OAEP.new(private_key)
-        try:
-            self.key = cipher_rsa.decrypt(session_key)
-        except ValueError:
-            rndfile = Random.new()
-            self.key = rndfile.read(32)
+        if session_key is not None:
+            try:
+                self.key = cipher_rsa.decrypt(session_key)
+            except ValueError:
+                rndfile = Random.new()
+                self.key = rndfile.read(32)
+        else:
+            print('session key is not known')
 

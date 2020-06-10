@@ -60,6 +60,6 @@ class FileWidget(tk.Frame):
 
         :param str path: path to the file
         """
-        self._current_file = File(path, encrypted)
+        self._current_file = File(path, encrypted, encrypted_mode=mode)
         self._show_file_info(path)
         self._unlock_buttons()

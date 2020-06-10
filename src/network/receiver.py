@@ -83,7 +83,7 @@ class ReceiveThread(threading.Thread):
                                 if not data:
                                     break
                                 file.write(data)
-                        self._file_widget.set_file(path, encrypted=True)
+                        self._file_widget.set_file(path, encrypted=True, mode=mode)
                     else:
                         # message receiving
                         mode = conn.recv(3).decode()
